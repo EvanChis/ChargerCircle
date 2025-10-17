@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Discover New Buddies</h2>
+
+  <div class="match-card-wrapper">
+    {% if match %}
+      {% include "accounts/partials/match_card.html" %}
+    {% else %}
+      {% include "accounts/partials/no_more_matches.html" %}
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}

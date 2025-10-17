@@ -1,0 +1,5 @@
+{# templates/rooms/partials/thread_item.html #}
+<li>
+  <a href="{% url 'thread_detail' slug=thread.course.slug pk=thread.pk %}">{{ thread.title }}</a> 
+  <div class="meta">by {{ thread.author.first_name }}</div>
+</li>

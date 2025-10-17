@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charger Connect</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+    {% if user.is_authenticated %}
+    <header class="main-header">
+        <nav class="main-nav">
+            <a href="{% url 'dashboard' %}" class="nav-brand">Charger Connect</a>
+            <ul>
+                <li><a href="{% url 'discover' %}">Discover</a></li>
+                <li><a href="{% url 'buddies' %}">Buddies</a></li>
+                <li><a href="{% url 'sessions' %}">Sessions</a></li>
+                <li><a href="{% url 'course_list' %}">Rooms</a></li>
+                <li class="nav-item-messages">
+                    <a href="{% url 'inbox' %}">
+                        Messages
+                        <span id="notification-badge-container" {% if not pending_invites_count > 0 %}style="display: none;"{% endif %}>
+                            <span class="notification-badge" id="notification-badge-count">{{ pending_invites_count }}</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                        <svg class="icon icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.894 17.894a.75.75 0 01-1.06 0l-1.59-1.591a.75.75 0 111.06-1.06l1.59 1.59a.75.75 0 010 1.061zM12 18a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.06 17.894a.75.75 0 010-1.06l1.59-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM4.5 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H5.25a.75.75 0 01-.75-.75zM6.106 7.166a.75.75 0 011.06 0l1.59 1.59a.75.75 0 01-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06z"></path></svg>
+                        <svg class="icon icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 004.463-.69a.75.75 0 01.981.981A10.503 10.503 0 0118 19.5a10.5 10.5 0 01-10.5-10.5c0-1.61.38-3.14.981-4.528a.75.75 0 01.819.162z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </li>
+                
+                {% if user.profile.main_image_url %}
+                <li>
+                  <a href="{% url 'my_profile' %}">
+                    <img src="{{ user.profile.main_image_url }}" alt="My Profile" class="nav-profile-pic">
+                  </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    {% endif %}
+
+    <main>
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+      // CSRF Script & WebSocket Logic
+      function getCookie(name) { /* ... */ }
+      const csrftoken = getCookie('csrftoken');
+      document.body.addEventListener('htmx:configRequest', function(evt) { /* ... */ });
+      /* {% if user.is_authenticated %} */
+      const notificationSocket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+      notificationSocket.onmessage = function(e) { /* ... */ };
+      notificationSocket.onclose = function(e) { /* ... */ };
+      function showToast(message) { /* ... */ }
+      
+      (function() {
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        // Checks for saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            // Saves the user's preference
+            if (body.classList.contains('light-mode')) {
+                localStorage.setItem('theme', 'light');
+            } else {
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+      })();
+      /* {% endif %} */
+    </script>
+    {% block extra_scripts %}{% endblock extra_scripts %}
+</body>
+</html>

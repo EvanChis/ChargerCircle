@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Course Rooms</h2>
+  
+  {% if courses %}
+    <ul class="styled-list"> {# Was 'thread-list', now 'styled-list' #}
+      {% for course in courses %}
+        <li>
+          <a href="{% url 'course_detail' slug=course.slug %}">{{ course.name }}</a> 
+          <div class="meta">{{ course.description }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No courses have been created yet.</p>
+  {% endif %}
+</div>
+{% endblock content %}

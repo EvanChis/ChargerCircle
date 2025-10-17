@@ -1,0 +1,30 @@
+<div class="image-gallery">
+  {% for img in profile_images %}
+  <div class="image-thumbnail-container">
+    <img src="{{ img.image.url }}" alt="Profile image {{ forloop.counter }}" class="profile-image-thumb {% if img.is_main %}is-main{% endif %}">
+    <div class="image-actions">
+      {% if not img.is_main %}
+        <form
+          hx-post="{% url 'set_main_profile_image' pk=img.pk %}"
+          hx-target="#profile-editor-wrapper"
+          hx-swap="innerHTML"
+          style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary btn-sm">Set as Main</button>
+        </form>
+        <form
+          hx-post="{% url 'delete_profile_image' pk=img.pk %}"
+          hx-target="#profile-editor-wrapper"
+          hx-swap="innerHTML"
+          hx-confirm="Are you sure you want to delete this picture?"
+          style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary btn-sm btn-danger">Delete</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+    <p>You haven't uploaded any pictures yet.</p>
+  {% endfor %}
+</div>

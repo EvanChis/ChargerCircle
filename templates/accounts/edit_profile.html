@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Edit Your Profile</h2>
+
+  <form method="post" class="card">
+    {% csrf_token %}
+    <h3>Your Details</h3>
+    <div class="form-group">
+      <label for="{{ update_form.first_name.id_for_label }}">First Name</label>
+      {{ update_form.first_name }}
+    </div>
+    <div class="form-group">
+      <label for="{{ update_form.last_name.id_for_label }}">Last Name</label>
+      {{ update_form.last_name }}
+    </div>
+    <div class="form-group">
+      <label for="{{ update_form.age.id_for_label }}">Age</label>
+      {{ update_form.age }}
+    </div>
+    <div class="form-group">
+      <label for="{{ update_form.bio.id_for_label }}">Bio</label>
+      {{ update_form.bio }}
+    </div>
+
+    <h3>Your Courses</h3>
+    <div class="form-group checkbox-group">
+      {{ update_form.courses }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+
+  <div id="profile-editor-wrapper">
+    {% include "accounts/partials/profile_editor.html" %}
+  </div>
+
+  </div>
+
+<script>
+  // Automatically submits the form when a file is chosen
+  function attachImageUploadListener() {
+    const imageInput = document.getElementById('id_image');
+    if (imageInput) {
+      imageInput.addEventListener('change', () => {
+        document.getElementById('image-upload-form').dispatchEvent(new Event('submit', { bubbles: true }));
+      });
+    }
+  }
+
+  // Attaches listener on initial page load
+  attachImageUploadListener();
+
+  // Re-attaches listener after HTMX swaps the content
+  document.body.addEventListener('htmx:afterSwap', function(evt) {
+    attachImageUploadListener();
+  });
+</script>
+{% endblock content %}

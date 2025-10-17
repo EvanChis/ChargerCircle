@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>{{ course.name }}</h2>
+  <p>{{ course.description }}</p>
+
+  <h3>Threads</h3>
+  <ul class="styled-list" id="thread-list">
+    {% for thread in threads %}
+      {% include "rooms/partials/thread_item.html" %}
+    {% endfor %}
+  </ul>
+
+  <h3>Start a New Thread</h3>
+  <form method="post" class="card">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ form.title.label_tag }}
+      {{ form.title }}
+    </div>
+    <div class="form-group">
+      {{ form.content.label_tag }}
+      {{ form.content }}
+    </div>
+    <button type="submit" class="btn btn-primary">Create Thread</button>
+  </form>
+
+</div>
+{% endblock content %}
+
+
+{% block extra_scripts %}
+<script>
+  const roomSlug = "{{ course.slug|escapejs }}";
+  const roomSocket = new WebSocket('ws://' + window.location.host + '/ws/course_room/' + roomSlug + '/');
+
+  roomSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.message_type === 'new_thread') {
+      const threadList = document.getElementById('thread-list');
+      threadList.insertAdjacentHTML('afterbegin', data.html);
+    }
+  };
+
+  roomSocket.onclose = function(e) {
+    console.error('Course room socket closed unexpectedly');
+  };
+</script>
+{% endblock %}

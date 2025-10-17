@@ -1,0 +1,32 @@
+<div class="card match-card">
+  {% if match.user.profile.main_image_url %}
+    <img src="{{ match.user.profile.main_image_url }}" alt="{{ match.user.first_name }}'s profile" class="profile-main-image">
+  {% else %}
+    <div class="profile-main-image-placeholder">
+      <span>{{ match.user.first_name.0 }}</span>
+    </div>
+  {% endif %}
+  
+  <div class="profile-info" style="justify-content: center;">
+    <h2>{{ match.user.first_name }} {{ match.user.last_name }}, {{ match.user.age }}</h2>
+  </div>
+
+  {% if match.shared_courses %}
+    <div class="course-tags" style="justify-content: center;">
+        {% for course in match.shared_courses %}
+            <span class="course-tag">{{ course.name }}</span>
+        {% endfor %}
+    </div>
+  {% endif %}
+  
+  <div class="cta-buttons match-actions">
+    <form hx-post="{% url 'skip_match' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary btn-danger">Skip</button>
+    </form>
+    <form hx-post="{% url 'send_buddy_request' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Add Buddy</button>
+    </form>
+  </div>
+</div>

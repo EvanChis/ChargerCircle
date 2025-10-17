@@ -1,0 +1,24 @@
+{% load messaging_extras %}
+
+{% with parts=message.content|split:"::" %}
+{% with session_id=parts.1 invite_text=parts.2 %}
+<div class="card invite-card" id="message-{{ message.id }}">
+  <p>{{ invite_text }}</p>
+  
+  {% if message.sender == request.user %}
+    <small class="meta">Invite sent. Waiting for responses.</small>
+  {% else %}
+    <div class="cta-buttons">
+      <form hx-post="{% url 'accept_session_invite' session_id=session_id message_id=message.id %}" hx-target="#message-{{ message.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button class="btn btn-primary btn-sm">Accept</button>
+      </form>
+      <form hx-post="{% url 'decline_session_invite' session_id=session_id message_id=message.id %}" hx-target="#message-{{ message.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <button class="btn btn-secondary btn-sm btn-danger">Decline</button>
+      </form>
+    </div>
+  {% endif %}
+
+</div>
+{% endwith %}{% endwith %}

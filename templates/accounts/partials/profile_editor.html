@@ -1,0 +1,25 @@
+<div class="card">
+  {% include "accounts/partials/image_list.html" %}
+</div>
+
+<div id="upload-form-container">
+  {% if profile_images.count < 5 %}
+    <h3>Upload a New Picture</h3>
+    <form id="image-upload-form"
+      hx-post="{% url 'edit_profile' %}"
+      hx-target="#profile-editor-wrapper"
+      hx-swap="innerHTML"
+      enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <input type="file" name="image" id="id_image" class="visually-hidden" accept="image/*">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('id_image').click();">
+          Upload Picture
+        </button>
+        <small class="form-text">Select an image to automatically upload it.</small>
+      </div>
+    </form>
+  {% else %}
+    <p class="meta">You've reached the maximum of 5 pictures.</p>
+  {% endif %}
+</div>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Your Sessions</h2>
+
+  <h3>My Sessions</h3>
+  {% if my_sessions %}
+    <ul class="styled-list">
+      {% for session in my_sessions %}
+        <li>
+          <a href="{% url 'session_detail' pk=session.pk %}">
+            {{ session.course.name }}: {{ session.topic }}
+          </a>
+          <span class="meta">Hosted by {{ session.host.first_name }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="card">
+      <p>You haven't joined any sessions yet. Create one below!</p>
+    </div>
+  {% endif %}
+  <div style="margin-top: 1rem;">
+    <a href="{% url 'create_session' %}" class="btn btn-secondary">Create a New Session</a>
+  </div>
+
+  </div>
+{% endblock %}

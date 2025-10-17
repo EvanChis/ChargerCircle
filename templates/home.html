@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="home-container">
+    <h1 class="kinetic-gradient">Find your UAH people.</h1>
+    <p class="subtitle">Join study sessions, connect with classmates, and build your community.</p>
+    <div class="cta-buttons">
+      <a href="{% url 'signup' %}" class="btn">Sign Up</a>
+      <a href="{% url 'login' %}" class="btn btn-primary">Log In</a>
+    </div>
+  </div>
+{% endblock content %}

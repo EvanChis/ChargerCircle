@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body_class %}logged-out{% endblock %}
+
+{% block content %}
+<div class="logged-out-header">
+  <a href="{% url 'home' %}">Charger Connect</a>
+</div>
+
+<div class="content-wrapper">
+  <h2 style="text-align: center;">Sign Up</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        {{ field.label_tag }}
+        {{ field }}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+  </form>
+</div>
+{% endblock content %}

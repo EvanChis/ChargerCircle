@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>Your Buddies</h2>
+
+  <h3>Buddy List</h3>
+  <div id="buddy-list">
+    {% if buddy_list %}
+      {% include "accounts/partials/buddy_list.html" %}
+    {% else %}
+      <div class="card">
+        <p>You don't have any buddies yet. Head over to the <a href="{% url 'discover' %}">Discover</a> page to find some!</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <h3>Incoming Buddy Requests</h3>
+  {% if incoming_buddy_requests %}
+    <ul class="styled-list">
+      {% for req in incoming_buddy_requests %}
+        <li id="br-{{ req.id }}">
+          <span>Buddy request from <strong>{{ req.from_user.first_name }} {{ req.from_user.last_name }}</strong></span>
+          <div class="cta-buttons">
+            <form hx-post="{% url 'accept_buddy_request' request_id=req.id %}" hx-target="closest li" hx-swap="outerHTML">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary">Accept</button>
+            </form>
+            <form hx-post="{% url 'decline_buddy_request' request_id=req.id %}" hx-target="closest li" hx-swap="outerHTML">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary btn-danger">Decline</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="card"><p>You have no incoming buddy requests.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

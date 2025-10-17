@@ -1,0 +1,16 @@
+<form hx-post="{% url 'edit_post' pk=post.id %}" hx-target="#post-{{ post.id }}" hx-swap="outerHTML" class="card">
+  {% csrf_token %}
+  <div class="form-group">
+    {{ form.content }}
+  </div>
+  <div class="cta-buttons">
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <button type="button" class="btn btn-secondary" 
+      hx-get="{% url 'thread_detail' slug=post.thread.course.slug pk=post.thread.pk %}"
+      hx-target="closest form"
+      hx-select="#post-{{ post.id }}"
+      hx-swap="outerHTML">
+      Cancel
+    </button>
+  </div>
+</form>

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  <h2>{{ thread.title }}</h2>
+  <p class="meta">Started by {{ thread.author.first_name }} in {{ thread.course.name }}</p>
+
+  {% if original_post %}
+  <div class="card original-post" id="post-{{ original_post.id }}">
+    <div class="post-meta">
+      <strong>{{ original_post.author.first_name }} wrote:</strong>
+      {% if original_post.author == request.user %}
+        <div class="post-actions">
+          <button class="btn btn-secondary btn-sm"
+            hx-get="{% url 'edit_post' pk=original_post.id %}"
+            hx-target="#post-{{ original_post.id }}"
+            hx-swap="outerHTML">
+            Edit
+          </button>
+          <button class="btn btn-secondary btn-sm btn-danger"
+            hx-post="{% url 'delete_post' pk=original_post.id %}"
+            hx-headers='{"X-HX-Redirect": "{% url 'course_detail' slug=thread.course.slug %}"}'
+            hx-confirm="Are you sure? Deleting the original post will delete the entire thread.">
+            Delete Thread
+          </button>
+        </div>
+      {% endif %}
+    </div>
+    <div class="post-content">
+      {{ original_post.content|linebreaks }}
+    </div>
+  </div>
+  {% endif %}
+
+  <h3>Replies</h3>
+  <div id="post-list">
+    {% for post in replies %}
+      {% include "rooms/partials/post_item.html" %}
+    {% empty %}
+      <p>No replies yet. Be the first!</p>
+    {% endfor %}
+  </div>
+
+  <h3>Post a Reply</h3>
+  <form method="post" class="card">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ form.content.label_tag }}
+      {{ form.content }}
+    </div>
+    <button type="submit" class="btn btn-primary">Post Reply</button>
+  </form>
+
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+  // HTMX event to handle the redirect after deleting a thread
+  document.body.addEventListener('htmx:response', function(evt) {
+    if (evt.detail.xhr.status === 200 && evt.detail.xhr.responseURL.includes('course')) {
+        window.location.href = evt.detail.xhr.responseURL;
+    }
+  });
+
+  const roomSlug = "{{ thread.course.slug|escapejs }}";
+  const roomSocket = new WebSocket('ws://' + window.location.host + '/ws/course_room/' + roomSlug + '/');
+
+  roomSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.message_type === 'new_post') {
+      const postList = document.getElementById('post-list');
+      const noRepliesMsg = postList.querySelector('p');
+      if (noRepliesMsg) {
+        noRepliesMsg.remove();
+      }
+      postList.insertAdjacentHTML('beforeend', data.html);
+    }
+  };
+
+  roomSocket.onclose = function(e) {
+    console.error('Course room socket closed unexpectedly');
+  };
+</script>
+{% endblock %}

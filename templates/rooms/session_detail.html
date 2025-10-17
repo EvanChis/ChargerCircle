@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper">
+  
+  <div class="session-header">
+    <span class="course-tag">{{ session.course.name }}</span>
+    <h2>{{ session.topic }}</h2>
+    <p class="meta">Hosted by <strong>{{ session.host.first_name }} {{ session.host.last_name }}</strong></p>
+  </div>
+
+  <h3>Participants ({{ session.participants.count }})</h3>
+  
+  <div id="participant-list" 
+       hx-get="{% url 'session_participants' pk=session.pk %}" 
+       hx-trigger="every 5s"
+       hx-swap="innerHTML">
+    {% include "rooms/partials/participant_list.html" %}
+  </div>
+
+  <div class="session-actions">
+    {% if session.host == request.user %}
+      <form method="post" action="{% url 'delete_session' pk=session.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete this session?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary btn-danger">Delete Session</button>
+      </form>
+    {% elif request.user in session.participants.all %}
+      <form method="post" action="{% url 'leave_session' pk=session.pk %}" onsubmit="return confirm('Are you sure you want to leave this session?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">Leave Session</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
