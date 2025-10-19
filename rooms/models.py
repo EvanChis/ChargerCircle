@@ -3,6 +3,7 @@
 from django.db import models
 from django.conf import settings
 
+# Course/Rooms/Activities/Events Model
 class Course(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
@@ -11,6 +12,7 @@ class Course(models.Model):
     def __str__(self):
         return self.name
 
+# A Thread is a discussion inside a Room (a forum thread)
 class Thread(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='threads')
     title = models.CharField(max_length=255)
@@ -19,7 +21,7 @@ class Thread(models.Model):
 
     def __str__(self):
         return self.title
-
+# A Post is a single message inside a Thread
 class Post(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
@@ -29,6 +31,7 @@ class Post(models.Model):
     def __str__(self):
         return f'Post by {self.author} in {self.thread.title}'
 
+# A Session is a live study/hangout for a Course
 class Session(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     host = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='hosted_sessions')

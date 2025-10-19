@@ -10,7 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('', course_list_view, name='course_list'),
+    path('', course_list_view, name='course_list'), # homepage for courses list
     
     # Post URLs
     path('post/edit/<int:pk>/', edit_post_view, name='edit_post'),
