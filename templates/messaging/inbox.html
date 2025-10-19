@@ -28,6 +28,7 @@
     {% if selected_thread %}
       data-thread-id="{{ selected_thread.pk }}" 
       data-user-id="{{ request.user.pk }}"
+      data-user-first-name="{{ request.user.first_name }}"
       data-participant-count="{{ selected_thread.participants.count }}"
     {% endif %}>
     {% if selected_thread %}
@@ -78,74 +79,3 @@
   </section>
 </div>
 {% endblock content %}
-
-{% block extra_scripts %}
-{% if selected_thread %}
-<script>
-  const chatWindow = document.querySelector('.chat-window');
-  const threadId = JSON.parse(chatWindow.dataset.threadId);
-  const currentUserId = JSON.parse(chatWindow.dataset.userId);
-  const participantCount = parseInt(chatWindow.dataset.participantCount, 10);
-
-  const messageList = document.getElementById('message-list');
-  const chatForm = document.getElementById('chat-form');
-  const messageInput = chatForm.querySelector('.message-input');
-  const typingIndicator = document.getElementById('typing-indicator');
-  let typingTimer;
-
-  function addMessageToUI(content, senderId, senderFirstName) {
-    const messageClass = (senderId === currentUserId) ? 'sent' : 'received';
-    const showSenderName = (senderId !== currentUserId && participantCount > 2);
-    const senderNameHTML = showSenderName ? `<small class="message-sender-name">${senderFirstName}</small>` : '';
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + messageClass;
-    messageDiv.innerHTML = `${senderNameHTML}<div id="new-message-temp"><p>${content}</p></div>`;
-    messageList.appendChild(messageDiv);
-    messageList.scrollTop = messageList.scrollHeight;
-  }
-
-  // Scrolls to the bottom on page load
-  messageList.scrollTop = messageList.scrollHeight;
-
-  const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + threadId + '/');
-  
-  chatSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.type === 'chat_message') {
-        typingIndicator.style.display = 'none';
-        if (data.sender_id !== currentUserId) {
-            addMessageToUI(data.message, data.sender_id, data.sender_first_name);
-        }
-    } else if (data.type === 'typing' && data.sender_id !== currentUserId) {
-        typingIndicator.style.display = 'block';
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            typingIndicator.style.display = 'none';
-        }, 2000);
-    }
-  };
-
-  chatSocket.onclose = function(e) { console.error('Chat socket closed unexpectedly'); };
-
-  chatForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const message = messageInput.value;
-    if (message.trim() === '') return;
-    
-    addMessageToUI(message, currentUserId, "{{ request.user.first_name }}");
-    
-    chatSocket.send(JSON.stringify({ 
-      'type': 'chat_message', 
-      'message': message, 
-      'sender_id': currentUserId,
-      'sender_first_name': "{{ request.user.first_name }}"
-    }));
-    messageInput.value = '';
-  });
-
-  messageInput.addEventListener('keyup', function(e) {
-    chatSocket.send(JSON.stringify({ 'type': 'typing', 'sender_id': currentUserId }));
-  });
-</script>
-{% endif %}
-{% endblock extra_scripts %}

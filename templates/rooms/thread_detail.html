@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="content-wrapper">
+<div class="content-wrapper" id="thread-detail-page" data-room-slug="{{ thread.course.slug|escapejs }}">
   <h2>{{ thread.title }}</h2>
   <p class="meta">Started by {{ thread.author.first_name }} in {{ thread.course.name }}</p>
 
@@ -53,33 +53,3 @@
 
 </div>
 {% endblock content %}
-
-{% block extra_scripts %}
-<script>
-  // HTMX event to handle the redirect after deleting a thread
-  document.body.addEventListener('htmx:response', function(evt) {
-    if (evt.detail.xhr.status === 200 && evt.detail.xhr.responseURL.includes('course')) {
-        window.location.href = evt.detail.xhr.responseURL;
-    }
-  });
-
-  const roomSlug = "{{ thread.course.slug|escapejs }}";
-  const roomSocket = new WebSocket('ws://' + window.location.host + '/ws/course_room/' + roomSlug + '/');
-
-  roomSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.message_type === 'new_post') {
-      const postList = document.getElementById('post-list');
-      const noRepliesMsg = postList.querySelector('p');
-      if (noRepliesMsg) {
-        noRepliesMsg.remove();
-      }
-      postList.insertAdjacentHTML('beforeend', data.html);
-    }
-  };
-
-  roomSocket.onclose = function(e) {
-    console.error('Course room socket closed unexpectedly');
-  };
-</script>
-{% endblock %}

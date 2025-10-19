@@ -54,39 +54,8 @@
 
     <div id="toast-container"></div>
 
-    <script>
-      // CSRF Script & WebSocket Logic
-      function getCookie(name) { /* ... */ }
-      const csrftoken = getCookie('csrftoken');
-      document.body.addEventListener('htmx:configRequest', function(evt) { /* ... */ });
-      /* {% if user.is_authenticated %} */
-      const notificationSocket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
-      notificationSocket.onmessage = function(e) { /* ... */ };
-      notificationSocket.onclose = function(e) { /* ... */ };
-      function showToast(message) { /* ... */ }
-      
-      (function() {
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        
-        // Checks for saved theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        }
-
-        themeToggle.addEventListener('click', () => {
-            body.classList.toggle('light-mode');
-            // Saves the user's preference
-            if (body.classList.contains('light-mode')) {
-                localStorage.setItem('theme', 'light');
-            } else {
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-      })();
-      /* {% endif %} */
-    </script>
+    <script src="{% static 'js/main.js' %}" defer></script>
+    
     {% block extra_scripts %}{% endblock extra_scripts %}
 </body>
 </html>

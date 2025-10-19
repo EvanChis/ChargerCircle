@@ -1,32 +1,52 @@
 <div class="card match-card">
-  {% if match.user.profile.main_image_url %}
-    <img src="{{ match.user.profile.main_image_url }}" alt="{{ match.user.first_name }}'s profile" class="profile-main-image">
-  {% else %}
-    <div class="profile-main-image-placeholder">
-      <span>{{ match.user.first_name.0 }}</span>
-    </div>
-  {% endif %}
+  <div class="profile-image-gallery" id="profile-gallery-{{ match.user.pk }}" data-user-pk="{{ match.user.pk }}">
+    {% if match.user.profile.images.all %}
+      {% for image in match.user.profile.images.all %}
+        <img src="{{ image.image.url }}" 
+             alt="{{ match.user.first_name }}'s profile image" 
+             class="profile-gallery-image {% if forloop.first %}active{% endif %}"
+             data-image-index="{{ forloop.counter0 }}">
+      {% endfor %}
+    {% else %}
+      <div class="profile-image-placeholder">
+        <span>{{ match.user.first_name.0 }}</span>
+      </div>
+    {% endif %}
+
+    {% if match.user.profile.images.count > 1 %}
+      <div class="gallery-controls show-btns">
+        <button class="gallery-control-btn left" data-gallery-user="{{ match.user.pk }}" data-gallery-direction="-1">&#10094;</button>
+        <button class="gallery-control-btn right" data-gallery-user="{{ match.user.pk }}" data-gallery-direction="1">&#10095;</button>
+      </div>
+      <div class="gallery-pagination">
+        {% for image in match.user.profile.images.all %}
+          <span class="pagination-dot {% if forloop.first %}active{% endif %}" 
+                data-gallery-user="{{ match.user.pk }}" 
+                data-gallery-index="{{ forloop.counter0 }}"></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
   
-  <div class="profile-info" style="justify-content: center;">
+  <div class="profile-info">
     <h2>{{ match.user.first_name }} {{ match.user.last_name }}, {{ match.user.age }}</h2>
+    {% if match.shared_courses %}
+      <div class="course-tags">
+          {% for course in match.shared_courses %}
+              <span class="course-tag">{{ course.name }}</span>
+          {% endfor %}
+      </div>
+    {% endif %}
   </div>
 
-  {% if match.shared_courses %}
-    <div class="course-tags" style="justify-content: center;">
-        {% for course in match.shared_courses %}
-            <span class="course-tag">{{ course.name }}</span>
-        {% endfor %}
-    </div>
-  {% endif %}
-  
   <div class="cta-buttons match-actions">
-    <form hx-post="{% url 'skip_match' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML">
+    <form id="skip-form" hx-post="{% url 'skip_match' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML" hx-trigger="submitSkip from:body">
       {% csrf_token %}
-      <button type="submit" class="btn btn-secondary btn-danger">Skip</button>
+      <button type="button" class="btn btn-secondary btn-danger" data-discover-action="left">Skip</button>
     </form>
-    <form hx-post="{% url 'send_buddy_request' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML">
+    <form id="like-form" hx-post="{% url 'like_user' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML" hx-trigger="submitLike from:body">
       {% csrf_token %}
-      <button type="submit" class="btn btn-primary">Add Buddy</button>
+      <button type="button" class="btn btn-primary" data-discover-action="right">Like</button>
     </form>
   </div>
 </div>

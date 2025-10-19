@@ -1,0 +1,15 @@
+/* Header and Navigation Styles */
+.main-header { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(var(--header-bg-rgb) / 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); z-index: 1000; height: 60px; }
+.main-nav { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 100%; }
+.nav-brand { font-weight: 700; font-size: 1.25rem; color: var(--u-ink-inv-color); text-decoration: none; }
+.main-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 1.5rem; align-items: center; }
+.main-nav a { color: rgba(var(--u-ink-inv-rgb) / 0.8); text-decoration: none; font-weight: 500; transition: color 150ms ease; }
+.main-nav a:hover { color: var(--u-accent-color); }
+
+.logged-out-header { padding: 1.5rem; text-align: center; }
+.logged-out-header a { font-weight: 700; font-size: 1.25rem; color: rgba(var(--u-ink-inv-rgb) / 0.8); text-decoration: none; transition: color 150ms ease; }
+.logged-out-header a:hover { color: var(--u-accent-color); }
+
+/* Nav Profile Picture */
+.nav-profile-pic { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(var(--u-ink-inv-rgb) / 0.2); vertical-align: middle; transition: transform 150ms ease; }
+.nav-profile-pic:hover { transform: scale(1.1); }

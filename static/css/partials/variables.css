@@ -1,0 +1,76 @@
+/* Central Design Tokens */
+:root {
+  /* --- Core Colors (as space-separated RGB components for rgba?) --- */
+  --u-primary-rgb: 0 95 184;
+  --u-accent-rgb: 0 201 255;
+  --u-secondary-rgb: 108 43 217;
+  --u-bg-dark-rgb: 18 24 30;
+  --u-ink-inv-rgb: 248 250 252;
+  --header-bg-rgb: 28 36 46;
+  --card-bg-rgb: 34 42 54;
+  --online-green-rgb: 4 184 94;
+  --white-rgb: 255 255 255;
+  --black-rgb: 0 0 0;
+  --form-select-arrow-rgb: 107 114 128;
+
+  /* Core Colors (rgb() versions) */
+--u-primary-color: rgb(0, 95, 184);
+--u-accent-color: rgb(0, 201, 255);
+--u-secondary-color: rgb(108, 43, 217);
+--u-bg-dark-color: rgb(18, 24, 30);
+--u-ink-inv-color: rgb(248, 250, 252);
+--header-bg-color: rgb(28, 36, 46);
+--card-bg-color: rgb(34, 42, 54);
+--online-green-color: rgb(4, 184, 94);
+--white-color: rgb(255, 255, 255);
+--black-color: rgb(0, 0, 0);
+--form-select-arrow-color: rgb(107, 114, 128);
+
+
+  /* --- Core Colors ??? --- */
+  --u-primary-color: rgb(var(--u-primary-rgb));
+  --u-accent-color: rgb(var(--u-accent-rgb));
+  --u-secondary-color: rgb(var(--u-secondary-rgb));
+  --u-bg-dark-color: rgb(var(--u-bg-dark-rgb));
+  --u-ink-inv-color: rgb(var(--u-ink-inv-rgb));
+  --header-bg-color: rgb(var(--header-bg-rgb));
+  --card-bg-color: rgb(var(--card-bg-rgb));
+  --online-green-color: rgb(var(--online-green-rgb));
+  --white-color: rgb(var(--white-rgb));
+  --black-color: rgb(var(--black-rgb));
+
+  /* --- Component Colors --- */
+  --btn-danger-bg-color: rgb(88, 28, 28);
+  --btn-danger-text-color: rgb(254, 202, 202);
+  --btn-danger-hover-bg-color: rgb(127, 29, 29);
+  --btn-danger-hover-text-color: rgb(254, 226, 226);
+  --toast-bg-rgb: 30 35 45;
+  --form-select-arrow-color: rgb(107, 114, 128);
+  --notification-badge-bg-color: rgb(239, 68, 68);
+
+  /* --- Material Design 3 Tokens (for new components) --- */
+  --u-primary: rgb(0, 95, 184);
+  --u-on-primary: #ffffff;
+  --u-surface-container-low: rgb(34, 42, 54);
+  --u-surface-container: rgb(44, 52, 64);
+  --u-surface-container-high: rgb(54, 62, 74);
+  --u-surface-container-highest: rgb(64, 72, 84);
+  --u-on-surface: #f1f1f1;
+  --u-on-surface-variant: #c4c6c9;
+  --u-error: #B3261E;
+  --u-on-error: #ffffff;
+  --u-blue-400: #64b5f6;
+}
+
+/* Light Mode Theme Definition */
+body.light-mode {
+  --u-bg-dark-rgb: 248 250 252;
+  --u-ink-inv-rgb: 18 24 30;
+  --header-bg-rgb: 255 255 255;
+  --card-bg-rgb: 229 231 235;
+  
+  --u-bg-dark-color: rgb(248, 250, 252);
+  --u-ink-inv-color: rgb(18, 24, 30);
+  --header-bg-color: rgb(255, 255, 255);
+  --card-bg-color: rgb(229, 231, 235);
+}

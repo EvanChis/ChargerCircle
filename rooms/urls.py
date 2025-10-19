@@ -5,7 +5,7 @@ from .views import (
     course_list_view, course_detail_view, thread_detail_view,
     create_session_view, accept_session_invite, decline_session_invite,
     session_detail_view, delete_session_view, leave_session_view,
-    session_participants_view, # <-- New
+    session_participants_view,
     edit_post_view, delete_post_view,
 )
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('sessions/<int:pk>/', session_detail_view, name='session_detail'),
     path('sessions/<int:pk>/delete/', delete_session_view, name='delete_session'),
     path('sessions/<int:pk>/leave/', leave_session_view, name='leave_session'),
-    path('sessions/<int:pk>/participants/', session_participants_view, name='session_participants'), # <-- New
+    path('sessions/<int:pk>/participants/', session_participants_view, name='session_participants'),
     path('sessions/invites/accept/<int:session_id>/<int:message_id>/', accept_session_invite, name='accept_session_invite'),
     path('sessions/invites/decline/<int:session_id>/<int:message_id>/', decline_session_invite, name='decline_session_invite'),
     

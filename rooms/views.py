@@ -10,6 +10,7 @@ from django.db.models import Count
 from .models import Course, Thread, Post, Session
 from messaging.models import MessageThread, Message
 from messaging.utils import get_or_create_message_thread
+from messaging.constants import SESSION_INVITE_PREFIX
 from .forms import ThreadForm, PostForm, SessionCreateForm
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -108,7 +109,8 @@ def create_session_view(request):
             all_participants = [request.user] + list(invited_buddies)
             thread = get_or_create_message_thread(all_participants)
             
-            invite_content = f"SESSION_INVITE::{session.id}::{request.user.first_name} invited you to a session for {session.course.name} on the topic: {session.topic}"
+            # Uses the constant to build the invite string
+            invite_content = f"{SESSION_INVITE_PREFIX}{session.id}::{request.user.first_name} invited you to a session for {session.course.name} on the topic: {session.topic}"
             new_message = Message.objects.create(thread=thread, sender=request.user, content=invite_content)
             
             channel_layer = get_channel_layer()

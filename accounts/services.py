@@ -1,36 +1,36 @@
 # accounts/services.py
 
 from django.contrib.auth import get_user_model
-from .models import BuddyRequest, SkippedMatch
+from .models import SkippedMatch, Like
 
 User = get_user_model()
 
 def find_matches(user):
-    """
-    Finds potential matches for a given user, excluding existing buddies,
-    pending requests, and permanently skipped users.
-    """
+    
+    # Finds potential matches for a given user, excluding existing buddies,
+    # users they have already liked, and permanently skipped users.
+    
     user_courses = user.courses.all()
 
-    # Get IDs of all users to exclude
+    # Gets IDs of all users to exclude
     buddies_ids = user.buddies.all().values_list('id', flat=True)
-    sent_requests_ids = BuddyRequest.objects.filter(from_user=user).values_list('to_user_id', flat=True)
-    received_requests_ids = BuddyRequest.objects.filter(to_user=user).values_list('from_user_id', flat=True)
+    likes_given_ids = Like.objects.filter(from_user=user).values_list('to_user_id', flat=True)
     skipped_ids = SkippedMatch.objects.filter(from_user=user).values_list('skipped_user_id', flat=True)
 
-    # Combine all IDs to exclude into a single set for efficiency
+    # Combines all IDs to exclude into a single set for efficiency
     exclude_ids = set(list(buddies_ids)) | \
-                set(list(sent_requests_ids)) | \
-                set(list(received_requests_ids)) | \
+                set(list(likes_given_ids)) | \
                 set(list(skipped_ids)) | \
                 {user.id}
 
-    # Find potential matches who share at least one course and are not in the exclusion list
+    # Finds potential matches and pre-fetch related data to prevent extra queries
     potential_matches = User.objects.filter(courses__in=user_courses) \
                                 .exclude(id__in=exclude_ids) \
+                                .select_related('profile') \
+                                .prefetch_related('profile__images', 'courses') \
                                 .distinct()
 
-    # Score the remaining matches
+    # Scores the remaining matches
     matches_with_scores = []
     for match in potential_matches:
         score = 0
@@ -50,5 +50,5 @@ def find_matches(user):
                 'shared_courses': shared_academic_courses,
             })
 
-    # Sort matches by score, highest first
+    # Sorts matches by score, highest first
     return sorted(matches_with_scores, key=lambda k: k['score'], reverse=True)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="content-wrapper">
+<div class="content-wrapper" id="course-detail-page" data-room-slug="{{ course.slug|escapejs }}">
   <h2>{{ course.name }}</h2>
   <p>{{ course.description }}</p>
 
@@ -28,23 +28,3 @@
 
 </div>
 {% endblock content %}
-
-
-{% block extra_scripts %}
-<script>
-  const roomSlug = "{{ course.slug|escapejs }}";
-  const roomSocket = new WebSocket('ws://' + window.location.host + '/ws/course_room/' + roomSlug + '/');
-
-  roomSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.message_type === 'new_thread') {
-      const threadList = document.getElementById('thread-list');
-      threadList.insertAdjacentHTML('afterbegin', data.html);
-    }
-  };
-
-  roomSocket.onclose = function(e) {
-    console.error('Course room socket closed unexpectedly');
-  };
-</script>
-{% endblock %}

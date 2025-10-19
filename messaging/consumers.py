@@ -73,7 +73,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def create_message(self, thread, sender, content):
         new_message = Message.objects.create(thread=thread, sender=sender, content=content)
-        thread.save() # Updates the thread's updated_at timestamp
+        thread.save() # Updates message thread's timestamp
         return new_message
 
     @sync_to_async

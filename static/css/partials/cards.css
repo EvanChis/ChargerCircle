@@ -1,0 +1,35 @@
+/* Card Style */
+.card { background: var(--card-bg-color); border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+.card strong { color: var(--u-ink-inv-color); font-size: 1.2rem; }
+.card em { color: var(--u-accent-color); }
+
+/* Toast Notification Styles */
+#toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1050; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast { background: rgba(var(--toast-bg-rgb) / 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--u-ink-inv-color); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); box-shadow: 0 10px 30px rgba(var(--black-rgb) / 0.2); opacity: 0; transform: translateY(20px); transition: opacity 300ms ease, transform 300ms ease; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Invite Card */
+.invite-card { background-color: var(--card-bg-color); border: 1px solid var(--u-primary-color); }
+.invite-card p { margin-top: 0; }
+.invite-card .cta-buttons { flex-direction: row; justify-content: flex-start; }
+
+.undo-card {
+  background-color: var(--u-surface-container);
+  border-left: 4px solid var(--u-primary);
+}
+
+/* Course Room / Thread Posts */
+.post-meta { 
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 0.5rem; 
+  color: rgba(var(--u-ink-inv-rgb) / 0.7); 
+}
+.post-actions { 
+  display: flex; 
+  gap: 0.5rem; 
+}
+.post-content { 
+  padding-left: 0.5rem; 
+}

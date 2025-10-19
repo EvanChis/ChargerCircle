@@ -36,25 +36,5 @@
     {% include "accounts/partials/profile_editor.html" %}
   </div>
 
-  </div>
-
-<script>
-  // Automatically submits the form when a file is chosen
-  function attachImageUploadListener() {
-    const imageInput = document.getElementById('id_image');
-    if (imageInput) {
-      imageInput.addEventListener('change', () => {
-        document.getElementById('image-upload-form').dispatchEvent(new Event('submit', { bubbles: true }));
-      });
-    }
-  }
-
-  // Attaches listener on initial page load
-  attachImageUploadListener();
-
-  // Re-attaches listener after HTMX swaps the content
-  document.body.addEventListener('htmx:afterSwap', function(evt) {
-    attachImageUploadListener();
-  });
-</script>
+</div>
 {% endblock content %}

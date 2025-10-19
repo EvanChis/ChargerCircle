@@ -15,7 +15,7 @@ class User(AbstractUser):
     # Custom fields
     age = models.PositiveIntegerField(blank=True, null=True)
     courses = models.ManyToManyField(Course, related_name='students', blank=True)
-    buddies = models.ManyToManyField('self', symmetrical=False, blank=True) # This line is critical
+    buddies = models.ManyToManyField('self', symmetrical=False, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -48,13 +48,17 @@ class ProfileImage(models.Model):
     def __str__(self):
         return f"Image for {self.profile.user.email}"
 
-class BuddyRequest(models.Model):
-    from_user = models.ForeignKey(User, related_name='from_user', on_delete=models.CASCADE)
-    to_user = models.ForeignKey(User, related_name='to_user', on_delete=models.CASCADE)
+# This new model will track "likes" from the Discover page.
+class Like(models.Model):
+    from_user = models.ForeignKey(User, related_name='likes_given', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name='likes_received', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+
     def __str__(self):
-        return f"From {self.from_user.email} to {self.to_user.email}"
+        return f"{self.from_user.first_name} likes {self.to_user.first_name}"
 
 class SkippedMatch(models.Model):
     from_user = models.ForeignKey(User, related_name='skipper', on_delete=models.CASCADE)
@@ -64,6 +68,7 @@ class SkippedMatch(models.Model):
     class Meta:
         # Ensures we don't have duplicate skip entries
         unique_together = ('from_user', 'skipped_user')
+        ordering = ['-timestamp'] # Part of Undo
 
     def __str__(self):
-        return f"{self.from_user.first_name} skipped {self.skipped_user.first_name}"
+        return f"{self.from_user.first_name} skipped or removed {self.skipped_user.first_name}"

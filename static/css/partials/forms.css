@@ -1,0 +1,23 @@
+/* Form Styles */
+.form-group { margin-bottom: 1.5rem; }
+form label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: rgba(var(--u-ink-inv-rgb) / 0.8); }
+.form-text { display: block; font-size: 0.9rem; color: rgba(var(--u-ink-inv-rgb) / 0.6); margin-top: 0.5rem; }
+form input[type="text"], form input[type="email"], form input[type="password"], form input[type="number"], form textarea, form select { width: 100%; box-sizing: border-box; background-color: var(--u-bg-dark-color); border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.2); border-radius: 8px; padding: 0.75rem; color: var(--u-ink-inv-color); font-size: 1rem; }
+form input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+form input[type="number"]::-webkit-outer-spin-button, form input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+form select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='rgb(var(--form-select-arrow-rgb))' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+form ul { list-style: none; padding: 0; margin: 0; }
+form ul li { margin-bottom: 0.5rem; }
+form textarea { min-height: 120px; }
+
+/* Checkbox Group for Profile Edit */
+.checkbox-group ul { list-style: none; padding: 0; columns: 2; -webkit-columns: 2; -moz-columns: 2; }
+.checkbox-group li { display: block; }
+.checkbox-group label { display: inline-block; margin-left: 0.5rem; }
+.checkbox-group input[type="checkbox"] { width: auto; }
+
+/* Buddy Select Pills */
+.buddy-select-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.buddy-pill input[type="checkbox"] { display: none; }
+.buddy-pill label { display: inline-block; padding: 0.5rem 1rem; border-radius: 999px; background-color: var(--card-bg-color); border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); cursor: pointer; transition: all 150ms ease-in-out; }
+.buddy-pill input[type="checkbox"]:checked + label { background-color: var(--u-primary-color); color: var(--white-color); border-color: var(--u-accent-color); transform: scale(1.05); }

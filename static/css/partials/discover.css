@@ -1,0 +1,206 @@
+/* --- DISCOVER PAGE STYLES --- */
+.content-wrapper-discover {
+  max-width: 500px;
+  padding: 0 1rem;
+}
+.content-wrapper-discover h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+  text-shadow: 2px 2px 5px rgba(var(--u-accent-rgb) / 0.2);
+  border-bottom: none;
+}
+.match-card-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 220px);
+  position: relative;
+}
+.match-card {
+  background-color: var(--u-surface-container-low);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(var(--black-rgb) / 0.2), 0 0 0 1px var(--u-surface-container);
+  padding: 0;
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+.profile-image-gallery {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background-color: var(--u-surface-container-highest);
+  overflow: hidden;
+}
+.profile-gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.profile-gallery-image.active {
+  opacity: 1;
+}
+.profile-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  background-color: var(--u-surface-container-highest);
+  color: var(--u-on-surface-variant);
+  font-size: 4em;
+  font-weight: bold;
+}
+.gallery-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: 10;
+}
+.gallery-control-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.gallery-pagination {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  right: 0;
+  padding: 0 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 11;
+}
+.pagination-dot {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(var(--white-rgb) / 0.4);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.pagination-dot.active {
+  background-color: var(--white-color);
+}
+.match-card .profile-info {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  flex-grow: 1;
+}
+.match-card .profile-info h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--u-on-surface);
+  border: none;
+  padding: 0;
+}
+.match-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 1rem;
+  background-color: transparent;
+  border-top: 1px solid var(--u-surface-container);
+}
+.match-actions form {
+  width: 48%;
+}
+.match-actions button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 99px;
+  transition: transform 0.1s ease;
+  cursor: pointer;
+  border: none;
+}
+.match-actions button:hover {
+  transform: scale(1.05);
+}
+.match-actions .btn-danger {
+  background-color: var(--btn-danger-bg-color);
+  color: var(--btn-danger-text-color);
+}
+.match-actions .btn-primary {
+  background-color: var(--u-primary);
+  color: var(--u-on-primary);
+}
+.match-card.swiping-right {
+  animation: swipeRight 0.5s forwards ease-out;
+}
+.match-card.swiping-left {
+  animation: swipeLeft 0.5s forwards ease-out;
+}
+@keyframes swipeRight {
+  from {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(300px) rotate(15deg);
+    opacity: 0;
+  }
+}
+@keyframes swipeLeft {
+  from {
+    transform: translateX(0) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-300px) rotate(-15deg);
+    opacity: 0;
+  }
+}
+/* --- END OF DISCOVER STYLES --- */
+
+/* --- BUDDY LIST STYLES --- */
+.buddy-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+.buddy-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.buddy-list-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--u-surface-container-high);
+}
+.buddy-list-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--u-surface-container-high);
+  display: grid;
+  place-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--u-primary);
+}
+/* --- END OF BUDDY LIST STYLES --- */

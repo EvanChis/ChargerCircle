@@ -1,17 +1,17 @@
 # messaging/context_processors.py
 
-# context_processors.py might be a demon
-
 from .models import Message
+from .constants import SESSION_INVITE_PREFIX # ...Under Construction...
 
 def pending_invites_count(request):
     if not request.user.is_authenticated:
         return {}
     
-    # Counts messages sent to the user that are session invites
+    # Counts session invite messages
+    # ...Something Something SESSION_INVITE_PREFIX...
     count = Message.objects.filter(
         thread__participants=request.user,
-        content__startswith='SESSION_INVITE::'
+        content__startswith=SESSION_INVITE_PREFIX
     ).exclude(
         sender=request.user
     ).count()

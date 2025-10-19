@@ -1,0 +1,32 @@
+/* Button Styles */
+.cta-buttons { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.cta-buttons .btn { width: 100%; max-width: 250px; }
+.btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; background-color: rgba(var(--u-ink-inv-rgb) / 0.2); color: rgba(var(--u-ink-inv-rgb) / 0.9); transition: transform 150ms ease-out; cursor: pointer; border: none; }
+.btn:hover { transform: scale(1.05); }
+.btn.btn-primary { background-color: var(--u-primary-color); color: var(--white-color); }
+button.btn { font-size: 1rem; }
+
+/* Secondary buttons are now solid by default */
+.btn-secondary { 
+  background-color: var(--card-bg-color); 
+  color: rgba(var(--u-ink-inv-rgb) / 0.7); 
+  padding: 0.5rem 1rem; 
+  font-size: 0.9rem; 
+}
+.btn-secondary:hover { 
+  color: rgba(var(--u-ink-inv-rgb) / 0.9); 
+}
+
+.btn-sm { padding: 0.25rem 0.75rem; font-size: 0.8rem; }
+.btn-danger { background-color: var(--btn-danger-bg-color); color: var(--btn-danger-text-color); }
+.btn-danger:hover { background-color: var(--btn-danger-hover-bg-color); color: var(--btn-danger-hover-text-color); }
+
+/* Theme Toggle Button */
+.theme-toggle { background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(var(--u-ink-inv-rgb), 0.7); }
+.theme-toggle:hover { color: var(--u-ink-inv-color); background-color: rgba(var(--u-ink-inv-rgb) / 0.2); }
+.theme-toggle .icon { width: 24px; height: 24px; }
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+body.light-mode .theme-toggle .icon-sun { display: block; }
+body.light-mode .theme-toggle .icon-moon { display: none; }

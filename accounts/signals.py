@@ -9,4 +9,3 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-# The old "save_user_profile" function has been deleted.

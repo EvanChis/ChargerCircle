@@ -6,7 +6,7 @@ register = template.Library()
 
 @register.filter
 def split(value, key):
-    """
-    Splits a string by the given key.
-    """
+    
+    # Splits a string by the given key.
+    
     return value.split(key)

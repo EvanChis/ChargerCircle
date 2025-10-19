@@ -1,0 +1,17 @@
+<ul class="styled-list" id="undo-list">
+    {% for skipped in last_skipped %}
+      <li id="undo-item-{{ skipped.pk }}" class="card undo-card">
+        <span>You skipped/removed <strong>{{ skipped.skipped_user.first_name }} {{ skipped.skipped_user.last_name }}</strong></span>
+        <form hx-post="{% url 'undo_action' pk=skipped.pk %}"
+              hx-target="#undo-item-{{ skipped.pk }}"
+              hx-swap="delete">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary btn-sm">Undo</button>
+        </form>
+      </li>
+    {% empty %}
+        <div class="card" id="no-undo-message">
+            <p>You have no recent actions to undo.</p>
+        </div>
+    {% endfor %}
+</ul>

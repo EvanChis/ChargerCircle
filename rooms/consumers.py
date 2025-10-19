@@ -49,7 +49,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             {'type': 'broadcast_presence', 'user_pk': self.user.pk, 'status': 'online' if is_online else 'offline'}
         )
     
-    # Database/cache operations need to be wrapped for async context
     @database_sync_to_async
     def set_cache_last_seen(self):
         cache.set(f'last_seen_{self.user.pk}', timezone.now(), 300)

@@ -40,3 +40,4 @@ class Session(models.Model):
         return f"'{self.topic}' for {self.course.name}"
 
 # The SessionInvite model has been removed; trying to rework how the session invite works a little
+# For context: the session invite used to be on the Sessions Page

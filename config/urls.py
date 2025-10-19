@@ -19,6 +19,6 @@ urlpatterns = [
 ]
 
 # This is only for serving user-uploaded media files during local development.
-# In production, a web server like Nginx would handle this.
+# In production, a web server like Nginx will handle this.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
