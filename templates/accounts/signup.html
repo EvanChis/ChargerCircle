@@ -1,23 +1,26 @@
-{% extends "base.html" %}
+<form method="post">
+  {% csrf_token %}
 
-{% block body_class %}logged-out{% endblock %}
+  {# Display any non-field-specific errors (e.g., "Passwords do not match") #}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-{% block content %}
-<div class="logged-out-header">
-  <a href="{% url 'home' %}">Charger Connect</a>
-</div>
-
-<div class="content-wrapper">
-  <h2 style="text-align: center;">Sign Up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <div class="form-group">
-        {{ field.label_tag }}
-        {{ field }}
-      </div>
-    {% endfor %}
-    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
-  </form>
-</div>
-{% endblock content %}
+  {% for field in form %}
+    <div class="form-group">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.help_text %}
+        <small class="form-text">{{ field.help_text }}</small>
+      {% endif %}
+      {% for error in field.errors %}
+        <div class="alert alert-danger" style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+</form>
