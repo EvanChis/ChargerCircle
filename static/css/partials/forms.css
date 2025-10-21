@@ -21,3 +21,30 @@ form textarea { min-height: 120px; }
 .buddy-pill input[type="checkbox"] { display: none; }
 .buddy-pill label { display: inline-block; padding: 0.5rem 1rem; border-radius: 999px; background-color: var(--card-bg-color); border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); cursor: pointer; transition: all 150ms ease-in-out; }
 .buddy-pill input[type="checkbox"]:checked + label { background-color: var(--u-primary-color); color: var(--white-color); border-color: var(--u-accent-color); transform: scale(1.05); }
+
+.form-errors {
+  background-color: var(--btn-danger-bg-color);
+  color: var(--btn-danger-text-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--btn-danger-hover-bg-color);
+}
+
+.form-field-error {
+  color: var(--btn-danger-text-color);
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+}
+
+.form-help-text {
+  font-size: 0.9rem;
+  color: rgba(var(--u-ink-inv-rgb) / 0.6);
+  margin-top: 0.5rem;
+}
+
+.form-help-text ul {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
