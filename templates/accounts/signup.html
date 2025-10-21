@@ -1,26 +1,47 @@
-<form method="post">
-  {% csrf_token %}
+{% extends "base.html" %}
 
-  {# Display any non-field-specific errors (e.g., "Passwords do not match") #}
-  {% if form.non_field_errors %}
-    <div class="alert alert-danger">
-      {% for error in form.non_field_errors %}
-        <p>{{ error }}</p>
-      {% endfor %}
-    </div>
-  {% endif %}
+{% block body_class %}logged-out{% endblock %}
 
-  {% for field in form %}
-    <div class="form-group">
-      {{ field.label_tag }}
-      {{ field }}
-      {% if field.help_text %}
-        <small class="form-text">{{ field.help_text }}</small>
+{% block content %}
+<div class="logged-out-header">
+  <a href="{% url 'home' %}">Charger Connect</a>
+</div>
+
+<div class="content-wrapper">
+  <div class="card">
+    <h2 style="text-align: center; border-bottom: none; margin-bottom: 1.5rem;">Sign Up</h2>
+    <form method="post">
+      {% csrf_token %}
+
+      {# This will display non-field errors like 'passwords do not match' #}
+      {% if form.non_field_errors %}
+        <div class="form-errors">
+          {% for error in form.non_field_errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
       {% endif %}
-      {% for error in field.errors %}
-        <div class="alert alert-danger" style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+
+      {% for field in form %}
+        <div class="form-group">
+          {{ field.label_tag }}
+          {{ field }}
+          
+          {# This handles the password validation rules #}
+          {% if field.help_text %}
+            <div class="form-help-text">{{ field.help_text|safe }}</div>
+          {% endif %}
+          
+          {# This handles errors for a specific field, like 'email already exists' #}
+          {% for error in field.errors %}
+            <div class="form-field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
       {% endfor %}
-    </div>
-  {% endfor %}
-  <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
-</form>
+      
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+    </form>
+  </div>
+  <p style="margin-top: 1rem; text-align: center;"><a href="{% url 'login' %}">Don't have an account? Log In</a></p>
+</div>
+{% endblock content %}
