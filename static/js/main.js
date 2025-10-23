@@ -104,6 +104,80 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
         });
     }
+    
+    // --- Chat Functionality ---
+    const chatWindow = document.querySelector('.chat-window');
+    if (chatWindow) {
+        const threadId = chatWindow.dataset.threadId;
+        const currentUserId = chatWindow.dataset.userId;
+        const currentUserName = chatWindow.dataset.userFirstName;
+        const messageList = document.getElementById('message-list');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.querySelector('.message-input');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + threadId + '/');
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+
+            if (data.type === 'typing') {
+                if (data.sender_id != currentUserId) {
+                    typingIndicator.style.display = 'block';
+                    setTimeout(() => {
+                        typingIndicator.style.display = 'none';
+                    }, 2000);
+                }
+            } else if (data.type === 'chat_message') {
+                const isSent = data.sender_id == currentUserId;
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ' + (isSent ? 'sent' : 'received');
+                
+                let senderName = '';
+                if (!isSent && chatWindow.dataset.participantCount > 2) {
+                    senderName = `<small class="message-sender-name">${data.sender_first_name}</small>`;
+                }
+
+                messageDiv.innerHTML = `${senderName}<p>${data.message}</p>`;
+                messageList.appendChild(messageDiv);
+                messageList.scrollTop = messageList.scrollHeight;
+                typingIndicator.style.display = 'none';
+            }
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = messageInput.value;
+                if (message.trim() !== '') {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'chat_message',
+                        'message': message,
+                        'sender_id': currentUserId,
+                        'sender_first_name': currentUserName
+                    }));
+                    messageInput.value = '';
+                }
+            });
+
+            messageInput.addEventListener('keyup', function(e) {
+                if (e.key !== 'Enter') {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'typing',
+                        'sender_id': currentUserId
+                    }));
+                }
+            });
+        }
+        
+        if (messageList) {
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+    }
 
     // --- Event Delegation for Dynamic Content ---
     document.body.addEventListener('click', function(event) {
