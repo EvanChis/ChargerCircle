@@ -44,6 +44,21 @@ document.addEventListener('DOMContentLoaded', function () {
         evt.detail.headers['X-CSRFToken'] = csrftoken;
     });
 
+    // Custom confirmation for HTMX forms
+    document.body.addEventListener('click', function(evt) {
+        const button = evt.target;
+        const form = button.closest('form');
+        
+        if (form && form.hasAttribute('data-confirm')) {
+            evt.preventDefault();
+            const confirmMessage = form.getAttribute('data-confirm');
+            showConfirm(confirmMessage, () => {
+                // Trigger the form submission
+                form.requestSubmit();
+            });
+        }
+    });
+
     // --- Global Helper Functions ---
     window.showToast = function(message) {
         const container = document.getElementById('toast-container');
@@ -57,6 +72,104 @@ document.addEventListener('DOMContentLoaded', function () {
             toast.classList.remove('show');
             toast.addEventListener('transitionend', () => toast.remove());
         }, 3000);
+    }
+
+    // Custom Confirmation Dialog
+    window.showConfirm = function(message, onConfirm, onCancel = null) {
+        // Create modal backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'confirm-backdrop';
+        backdrop.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        `;
+
+        // Create dialog box
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog';
+        dialog.style.cssText = `
+            background: var(--card-bg, #fff);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+        `;
+
+        dialog.innerHTML = `
+            <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.5; color: var(--text-primary, #333);">
+                ${message}
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary btn-sm" id="confirm-cancel" style="padding: 8px 16px;">
+                    Cancel
+                </button>
+                <button class="btn btn-primary btn-sm" id="confirm-ok" style="padding: 8px 16px;">
+                    OK
+                </button>
+            </div>
+        `;
+
+        backdrop.appendChild(dialog);
+        document.body.appendChild(backdrop);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            backdrop.style.opacity = '1';
+            dialog.style.transform = 'scale(1)';
+        });
+
+        // Handle button clicks
+        const cancelBtn = dialog.querySelector('#confirm-cancel');
+        const okBtn = dialog.querySelector('#confirm-ok');
+
+        const closeDialog = () => {
+            backdrop.style.opacity = '0';
+            dialog.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                document.body.removeChild(backdrop);
+            }, 200);
+        };
+
+        cancelBtn.addEventListener('click', () => {
+            closeDialog();
+            if (onCancel) onCancel();
+        });
+
+        okBtn.addEventListener('click', () => {
+            closeDialog();
+            if (onConfirm) onConfirm();
+        });
+
+        // Handle backdrop click
+        backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) {
+                closeDialog();
+                if (onCancel) onCancel();
+            }
+        });
+
+        // Handle escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeDialog();
+                if (onCancel) onCancel();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
     }
 
     function updateNotificationBadge(count) {

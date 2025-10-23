@@ -91,7 +91,9 @@ def remove_buddy(request, pk):
     )
     
     # Returns an empty response for the buddy list item, and the OOB item
-    return HttpResponse(undo_item_html)
+    response = HttpResponse()
+    response.write(f'<div hx-swap-oob="afterbegin:#undo-list">{undo_item_html}</div>')
+    return response
 
 @login_required
 @require_POST
@@ -127,11 +129,10 @@ def undo_action_view(request, pk):
         request=request
     )
     
-    # Uses HttpResponse with custom headers to trigger multiple OOB swaps
+    # Return a response that updates both the buddy list and undo list
     response = HttpResponse()
-    response['HX-Trigger'] = 'updateLists'
-    response.write(f'<div id="buddy-list" hx-swap-oob="true">{buddy_list_html}</div>')
-    response.write(f'<div id="undo-list-container" hx-swap-oob="true">{undo_list_html}</div>')
+    response.write(f'<div id="buddy-list-container" hx-swap-oob="outerHTML">{buddy_list_html}</div>')
+    response.write(f'<div id="undo-list-container" hx-swap-oob="outerHTML">{undo_list_html}</div>')
     
     return response
 
@@ -302,3 +303,6 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
     """Password reset successful confirmation"""
     template_name = 'accounts/password_reset_complete.html'
+
+
+

@@ -4,7 +4,8 @@
         <span>You skipped/removed <strong>{{ skipped.skipped_user.first_name }} {{ skipped.skipped_user.last_name }}</strong></span>
         <form hx-post="{% url 'undo_action' pk=skipped.pk %}"
               hx-target="#undo-item-{{ skipped.pk }}"
-              hx-swap="delete">
+              hx-swap="delete"
+              data-confirm="Are you sure you want to undo this action?">
           {% csrf_token %}
           <button type="submit" class="btn btn-secondary btn-sm">Undo</button>
         </form>

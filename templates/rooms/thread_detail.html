@@ -20,7 +20,7 @@
           <button class="btn btn-secondary btn-sm btn-danger"
             hx-post="{% url 'delete_post' pk=original_post.id %}"
             hx-headers='{"X-HX-Redirect": "{% url 'course_detail' slug=thread.course.slug %}"}'
-            hx-confirm="Are you sure? Deleting the original post will delete the entire thread.">
+            data-confirm="Are you sure? Deleting the original post will delete the entire thread.">
             Delete Thread
           </button>
         </div>
