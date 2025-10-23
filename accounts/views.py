@@ -3,14 +3,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.template.loader import render_to_string
+from django.contrib import messages
 
 
-from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm
+from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm, CustomPasswordResetForm
 from .services import find_matches
 from .models import ProfileImage, SkippedMatch, Like
 from rooms.models import Course, Session
@@ -278,3 +280,25 @@ def delete_profile_image(request, pk):
         new_main.save()
     context = get_profile_editor_context(request)
     return render(request, 'accounts/partials/profile_editor.html', context)
+
+# Password Reset Views
+class PasswordResetView(auth_views.PasswordResetView):
+    """Custom password reset view with our template"""
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    form_class = CustomPasswordResetForm
+    success_url = '/accounts/password_reset/done/'
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    """Password reset email sent confirmation"""
+    template_name = 'accounts/password_reset_done.html'
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    """Password reset form with new password"""
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = '/accounts/password_reset/complete/'
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    """Password reset successful confirmation"""
+    template_name = 'accounts/password_reset_complete.html'

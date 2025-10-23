@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="logged-out-header">
-  <a href="{% url 'home' %}">Charger Connect</a>
+  <a href="{% url 'home' %}">Charger Circle</a>
 </div>
 
 <div class="content-wrapper">
@@ -19,6 +19,9 @@
     {% endfor %}
     <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
   </form>
-  <p style="margin-top: 1rem; text-align: center;"><a href="{% url 'signup' %}">Don't have an account? Sign Up</a></p>
+  <div style="margin-top: 1rem; text-align: center;">
+    <p><a href="{% url 'signup' %}">Don't have an account? Sign Up</a></p>
+    <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+  </div>
 </div>
 {% endblock content %}

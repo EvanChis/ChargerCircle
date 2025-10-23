@@ -6,6 +6,7 @@ from .views import (
     signup_view, logout_view, dashboard_view, discover_view, skip_match_view,
     buddies_view, sessions_view, remove_buddy, profile_view, edit_profile_view,
     set_main_profile_image, delete_profile_image, like_user_view, undo_action_view,
+    PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView,
 )
 
 urlpatterns = [
@@ -13,6 +14,12 @@ urlpatterns = [
     path('signup/', signup_view, name='signup'),
     path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
     path('logout/', logout_view, name='logout'),
+    
+    # Password Reset
+    path('password_reset/', PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('password_reset/confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('password_reset/complete/', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
     # Core Pages
     path('dashboard/', dashboard_view, name='dashboard'),
