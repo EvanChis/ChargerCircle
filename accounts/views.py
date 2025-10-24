@@ -32,6 +32,10 @@ def check_for_match(user1, user2):
         # Cleans up the Like objects
         Like.objects.filter(from_user=user1, to_user=user2).delete()
         Like.objects.filter(from_user=user2, to_user=user1).delete()
+
+        # Cleans up the corresponding SkippedMatch "like" entries
+        SkippedMatch.objects.filter(from_user=user1, skipped_user=user2, action_type='like').delete()
+        SkippedMatch.objects.filter(from_user=user2, skipped_user=user1, action_type='like').delete()
         
         # Creates a message thread for the matched users
         get_or_create_message_thread([user1, user2])
@@ -59,7 +63,12 @@ def like_user_view(request, pk):
     if liked_user != request.user:
         # Create a Like object and an undoable action
         Like.objects.get_or_create(from_user=request.user, to_user=liked_user)
-        SkippedMatch.objects.create(from_user=request.user, skipped_user=liked_user, action_type='like')
+        # prevents duplicates if user skips then likes
+        SkippedMatch.objects.update_or_create(
+            from_user=request.user, 
+            skipped_user=liked_user, 
+            defaults={'action_type': 'like'}
+        )
         check_for_match(request.user, liked_user)
 
     matches = find_matches(request.user)
@@ -74,7 +83,7 @@ def like_user_view(request, pk):
 def remove_buddy(request, pk):
     buddy_to_remove = get_object_or_404(User, pk=pk)
     
-    # This is now a permanent removal as requested.
+    # This is now a permanent removal
     request.user.buddies.remove(buddy_to_remove)
     buddy_to_remove.buddies.remove(request.user)
     
@@ -151,7 +160,12 @@ def discover_view(request):
 @require_POST
 def skip_match_view(request, pk):
     skipped_user = get_object_or_404(User, pk=pk)
-    SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=skipped_user, action_type='skip')
+    # handles case where user likes then skips
+    SkippedMatch.objects.update_or_create(
+        from_user=request.user, 
+        skipped_user=skipped_user,
+        defaults={'action_type': 'skip'}
+    )
     matches = find_matches(request.user)
     next_match = matches[0] if matches else None
     if next_match:
