@@ -13,16 +13,17 @@
 # If you see: "We noticed... Do you...?"
 # CLICK YES
 
+# Always be sure terminal is:
+# (.venv) <Path> not just <Path>
+# If it's not do:
+.\.venv\Scripts\activate
+
 # Create your admin user for django admin priveleges:
 python manage.py createsuperuser
 
 # Now you're all set up!
 # DM if there are any issues
 
-# Always be sure terminal is:
-# (.venv) <Path> not just <Path>
-# If it's not do:
-.\.venv\Scripts\activate
 
 # In dev, mostly need:
 # Runs the server

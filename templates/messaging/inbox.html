@@ -11,8 +11,7 @@
           <a href="{% url 'conversation' thread_id=thread.pk %}" class="user-name">
             {% if thread.other_participants|length == 1 %}
               {% with buddy=thread.other_participants.0 %}
-                {{ buddy.first_name }} {{ buddy.last_name.0 }}.
-                {% if buddy.pk in online_user_ids %}<span class="online-indicator"></span>{% endif %}
+                {{ buddy.first_name }} {{ buddy.last_name.0 }}.<span class="online-indicator"></span>
               {% endwith %}
             {% else %}
               Group Chat ({{ thread.participants.count }})
@@ -37,8 +36,7 @@
             <h4 class="user-name">
               {% if selected_thread.other_participants|length == 1 %}
                 {% with buddy=selected_thread.other_participants.0 %}
-                  {{ buddy.first_name }} {{ buddy.last_name.0 }}.
-                  {% if buddy.pk in online_user_ids %}<span class="online-indicator"></span>{% endif %}
+                  {{ buddy.first_name }} {{ buddy.last_name.0 }}.<span class="online-indicator"></span>
                 {% endwith %}
               {% else %}
                 {% for p in selected_thread.other_participants|slice:":3" %}{{ p.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}

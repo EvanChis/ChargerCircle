@@ -24,7 +24,6 @@ if not exist ".env" (
     copy .env.example .env
 )
 
-REM HMMMMMMMMMMMMMMMMMMMMMMMMMMM
 REM Run initial database migrations
 echo Running database migrations...
 .venv\Scripts\python.exe manage.py migrate

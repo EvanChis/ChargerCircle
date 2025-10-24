@@ -1,6 +1,25 @@
 /* Online Presence Indicator */
-.online-indicator { display: inline-block; margin-left: 0.5rem; width: 10px; height: 10px; background-color: var(--online-green-color); border-radius: 50%; box-shadow: 0 0 8px var(--online-green-color); animation: pulse 2s infinite; }
-@keyframes pulse { 0% { box-shadow: 0 0 8px rgba(var(--online-green-rgb) / 0.8); } 50% { box-shadow: 0 0 12px 3px rgba(var(--online-green-rgb) / 0.5); } 100% { box-shadow: 0 0 8px rgba(var(--online-green-rgb) / 0.8); } }
+.online-indicator {
+  /* The dot is now completely hidden by default */
+  display: none;
+  margin-left: 0.5rem;
+  width: 10px;
+  height: 10px;
+  background-color: var(--online-green-color);
+  border-radius: 50%;
+}
+
+.online-indicator.is-online {
+  display: inline-block;
+  box-shadow: 0 0 8px var(--online-green-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 8px rgba(var(--online-green-rgb) / 0.8); }
+  50% { box-shadow: 0 0 12px 3px rgba(var(--online-green-rgb) / 0.5); }
+  100% { box-shadow: 0 0 8px rgba(var(--online-green-rgb) / 0.8); }
+}
 
 /* Nav Notification Badge */
 .nav-item-messages a { position: relative; }
