@@ -1,3 +1,6 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This partial file displays the form for editing a post. It submits the edit via an HTMX POST request and also includes a 'Cancel' button that uses an HTMX GET request to reload the original post content. {% endcomment %}
+
 <form hx-post="{% url 'edit_post' pk=post.id %}" hx-target="#post-{{ post.id }}" hx-swap="outerHTML" class="card">
   {% csrf_token %}
   <div class="form-group">

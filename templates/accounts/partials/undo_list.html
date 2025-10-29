@@ -1,3 +1,7 @@
+{% comment %} Author: Evan and Oju {% endcomment %}
+{% comment %} HTMX: This partial file displays a list of recent "skip" or "like" actions. Each item has an "Undo" button that uses an HTMX POST request to reverse the action
+      and remove the item from the list without a page reload. {% endcomment %}
+
 <ul class="styled-list" id="undo-list">
     {% for skipped in last_skipped %}
       {# The ID on this LI is no longer needed for HTMX swaps #}

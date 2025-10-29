@@ -1,3 +1,6 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This partial displays a single post item. It includes HTMX buttons that allow the post's author to edit or delete their post directly within the page. {% endcomment %}
+
 <div class="card post-item" id="post-{{ post.id }}">
   <div class="post-meta">
     <strong>{{ post.author.first_name }} replied:</strong>

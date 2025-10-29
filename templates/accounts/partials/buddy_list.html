@@ -1,3 +1,6 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This partial file displays the user's buddy list. Each item has a "Remove" button that uses an HTMX POST request to remove the buddy from the list without a page reload. It also displays real-time online status dots. {% endcomment %}
+
 <ul class="styled-list" id="buddy-list">
   {% for buddy in buddy_list %}
     <li id="buddy-{{ buddy.pk }}" class="buddy-list-item user-presence-container" data-user-pk="{{ buddy.pk }}">

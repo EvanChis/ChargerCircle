@@ -1,3 +1,7 @@
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This partial file displays the list of uploaded profile pictures. Each image has "Set as Main" and "Delete" buttons that use HTMX POST requests to update
+    the image status and refresh the gallery without a full page reload. {% endcomment %}
+
 <div class="image-gallery">
   {% for img in profile_images %}
   <div class="image-thumbnail-container">
