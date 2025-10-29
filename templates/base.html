@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charger Connect</title>
+    <title>Charger Circle</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
     
@@ -24,7 +24,7 @@
     {% if user.is_authenticated %}
     <header class="main-header">
         <nav class="main-nav">
-            <a href="{% url 'discover' %}" class="nav-brand">Charger Connect</a>
+            <a href="{% url 'dashboard' %}" class="nav-brand">Charger Circle</a>
             <ul>
                 <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
                 <li><a href="{% url 'buddies' %}">Buddies</a></li>

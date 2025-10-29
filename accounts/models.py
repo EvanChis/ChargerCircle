@@ -64,11 +64,12 @@ class SkippedMatch(models.Model):
     ACTION_CHOICES = (
         ('skip', 'Skip'),
         ('like', 'Like'),
+        ('remove', 'Remove'),
     )
     from_user = models.ForeignKey(User, related_name='actions', on_delete=models.CASCADE)
     skipped_user = models.ForeignKey(User, related_name='was_actioned_by', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    action_type = models.CharField(max_length=4, choices=ACTION_CHOICES, default='skip')
+    action_type = models.CharField(max_length=6, choices=ACTION_CHOICES, default='skip')
 
 
     class Meta:

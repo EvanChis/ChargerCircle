@@ -5,14 +5,16 @@ import json # for making green online dot independent so it doesn't flash
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.template.loader import render_to_string
+from django.contrib import messages
 
 
-from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm
+from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm, CustomPasswordResetForm
 from .services import find_matches
 from .models import ProfileImage, SkippedMatch, Like
 from rooms.models import Course, Session
@@ -88,8 +90,17 @@ def remove_buddy(request, pk):
     buddy_to_remove.buddies.remove(request.user)
     
     # SkippedMatch entries are created to prevent them from seeing each other again.
-    SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=buddy_to_remove)
-    SkippedMatch.objects.get_or_create(from_user=buddy_to_remove, skipped_user=request.user)
+    # Using action_type='remove' so these don't show up in the undo list
+    SkippedMatch.objects.get_or_create(
+        from_user=request.user, 
+        skipped_user=buddy_to_remove,
+        defaults={'action_type': 'remove'}
+    )
+    SkippedMatch.objects.get_or_create(
+        from_user=buddy_to_remove, 
+        skipped_user=request.user,
+        defaults={'action_type': 'remove'}
+    )
     
     # We return an empty response because the item is now gone permanently.
     return HttpResponse('')
@@ -107,13 +118,42 @@ def undo_action_view(request, pk):
     # For both likes and skips, we delete the SkippedMatch record.
     action_to_undo.delete()
 
-    return HttpResponse('')
+    # Re-render buddy list and undo list
+    buddy_list = request.user.buddies.all()
+    online_user_ids = get_online_user_ids()
+    buddy_list_html = render_to_string(
+        'accounts/partials/buddy_list.html',
+        {'buddy_list': buddy_list, 'online_user_ids': online_user_ids},
+        request=request
+    )
+    
+    # Only show undoable actions from discover page (like/skip), not buddy removals
+    last_skipped = SkippedMatch.objects.filter(
+        from_user=request.user,
+        action_type__in=['like', 'skip']
+    )[:10]
+    undo_list_html = render_to_string(
+        'accounts/partials/undo_list.html',
+        {'last_skipped': last_skipped},
+        request=request
+    )
+    
+    # Return a response that updates both the buddy list and undo list
+    response = HttpResponse()
+    response.write(f'<div id="buddy-list-container" hx-swap-oob="outerHTML">{buddy_list_html}</div>')
+    response.write(f'<div id="undo-list-container" hx-swap-oob="outerHTML">{undo_list_html}</div>')
+    
+    return response
 
 @login_required
 def buddies_view(request):
     buddy_list = request.user.buddies.all()
     online_user_ids = get_online_user_ids()
-    last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
+    # Only show undoable actions from discover page (like/skip), not buddy removals
+    last_skipped = SkippedMatch.objects.filter(
+        from_user=request.user,
+        action_type__in=['like', 'skip']
+    )[:10]
 
     context = {
         'buddy_list': buddy_list,
@@ -260,3 +300,28 @@ def delete_profile_image(request, pk):
         new_main.save()
     context = get_profile_editor_context(request)
     return render(request, 'accounts/partials/profile_editor.html', context)
+
+# Password Reset Views
+class PasswordResetView(auth_views.PasswordResetView):
+    """Custom password reset view with our template"""
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    form_class = CustomPasswordResetForm
+    success_url = '/accounts/password_reset/done/'
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    """Password reset email sent confirmation"""
+    template_name = 'accounts/password_reset_done.html'
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    """Password reset form with new password"""
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = '/accounts/password_reset/complete/'
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    """Password reset successful confirmation"""
+    template_name = 'accounts/password_reset_complete.html'
+
+
+
