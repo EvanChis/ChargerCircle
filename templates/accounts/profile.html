@@ -1,8 +1,13 @@
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This page does not contain specific HTMX functionality. It displays
+      either the logged-in user's own profile or another user's public
+      profile information. {% endcomment %}
+
 {% extends "base.html" %}
 
 {% block content %}
 <div class="content-wrapper">
-  
+
   <div class="profile-header">
     {% if profile_user.profile.main_image_url %}
       <img src="{{ profile_user.profile.main_image_url }}" alt="{{ profile_user.first_name }}'s profile picture" class="profile-main-image">
@@ -11,10 +16,10 @@
         <span>{{ profile_user.first_name.0 }}</span>
       </div>
     {% endif %}
-    
+
     <div class="profile-info">
       <h2>{{ profile_user.first_name }} {{ profile_user.last_name }}</h2>
-      
+
       {% if profile_user == request.user %}
         <a href="{% url 'edit_profile' %}" class="btn btn-secondary">Edit Profile</a>
         <a href="{% url 'logout' %}" class="btn btn-secondary btn-danger">Logout</a>
@@ -48,6 +53,6 @@
       </div>
     </div>
   {% endif %}
-  
+
 </div>
 {% endblock content %}

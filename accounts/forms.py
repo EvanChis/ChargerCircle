@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User, ProfileImage, Course
 
 """
-Author:
+Author: Evan
 This class defines the form fields shown on the "Sign Up" page.
 It's based on Django's standard user creation form but is
 customized to use the email address as the username and to
@@ -20,7 +20,7 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('email', 'first_name', 'last_name', 'age')
 
 """
-Author:
+Author: Evan
 This class defines the form used for uploading a new profile
 picture on the "Edit Profile" page. It is a simple form that
 only contains a single file upload field for an image.
@@ -34,7 +34,7 @@ class ProfileImageForm(forms.ModelForm):
         }
 
 """
-Author:
+Author: Evan
 This class defines the main form on the "Edit Profile" page.
 It allows a user to update their basic details (name, age),
 write a personal bio, and select which courses they are in

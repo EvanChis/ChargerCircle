@@ -1,10 +1,17 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This template displays a special session invite card in the chat.
+      It uses HTMX to handle the "Accept" and "Decline" buttons. When a user
+      clicks a button, HTMX sends the request and then replaces this entire
+      card with the response (e.g., "You accepted the invite") without
+      reloading the page. {% endcomment %}
+
 {% load messaging_extras %}
 
 {% with parts=message.content|split:"::" %}
 {% with session_id=parts.1 invite_text=parts.2 %}
 <div class="card invite-card" id="message-{{ message.id }}">
   <p>{{ invite_text }}</p>
-  
+
   {% if message.sender == request.user %}
     <small class="meta">Invite sent. Waiting for responses.</small>
   {% else %}

@@ -1,3 +1,8 @@
+{% comment %} Author: Evan and Oju {% endcomment %}
+{% comment %} HTMX: This page uses HTMX to allow users to remove a buddy or undo
+      a recent skip/like action without reloading the page. The list
+      updates instantly when these actions are performed. {% endcomment %}
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -17,7 +22,7 @@
 
   <h3>Undo Last Actions</h3>
   {% comment %} This container is no longer needed for out-of-band swaps, but is kept for structure. {% endcomment %}
-  <div id="undo-list-container"> 
+  <div id="undo-list-container">
       {% include "accounts/partials/undo_list.html" %}
   </div>
 </div>

@@ -8,7 +8,7 @@ from .models import SkippedMatch, Like
 User = get_user_model()
 
 """
-Author:
+Author: Evan
 This function is the core logic for the "Discover" page. It
 finds a list of potential buddies for the user. It works by:
 1. Finding all users who share at least one course.

@@ -4,7 +4,7 @@
 from django.apps import AppConfig
 
 """
-Author:
+Author: Evan
 This class tells Django how to treat the "accounts" app. It
 sets the app's name and also runs a special "ready" function
 when the app first loads. This "ready" function is used to

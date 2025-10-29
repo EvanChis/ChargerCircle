@@ -8,7 +8,7 @@ from django.dispatch import receiver
 from .models import User, Profile
 
 """
-Author:
+Author: Evan
 This function is a "signal receiver." It automatically runs
 every time a new 'User' account is created (saved for the
 first time). Its job is to instantly create a matching,

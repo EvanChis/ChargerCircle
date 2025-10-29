@@ -4,7 +4,7 @@
 from django.contrib.auth.base_user import BaseUserManager
 
 """
-Author:
+Author: Evan
 This class provides the core logic for how user accounts are
 created. It overrides Django's default behavior to use an
 email address as the main login identifier instead of a username.

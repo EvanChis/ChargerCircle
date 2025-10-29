@@ -1,1 +1,8 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This small template is used by the 'accept_session_invite' and
+      'decline_session_invite' views. When a user accepts or declines an invite,
+      HTMX swaps the original invite message content with the content generated
+      by this template (which simply shows the updated text like "User accepted
+      the invite."). {% endcomment %}
+
 <p>{{ message.content }}</p>

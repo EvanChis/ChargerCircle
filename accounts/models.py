@@ -96,7 +96,7 @@ class Like(models.Model):
         return f"{self.from_user.first_name} likes {self.to_user.first_name}"
 
 """
-Author:
+Author: Evan
 This class tracks every action a user takes on the Discover
 page (both "Likes" and "Skips"). This does two things:
 1. It prevents a user from seeing the same person again
