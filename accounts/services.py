@@ -1,10 +1,25 @@
 # accounts/services.py
 
+# Import get_user_model from django.contrib.auth because we need to query the main 'User' model.
 from django.contrib.auth import get_user_model
+# Import SkippedMatch, Like from .models because 'find_matches' needs them to exclude users.
 from .models import SkippedMatch, Like
 
 User = get_user_model()
 
+"""
+Author:
+This function is the core logic for the "Discover" page. It
+finds a list of potential buddies for the user. It works by:
+1. Finding all users who share at least one course.
+2. Filtering out people the user has already buddied with,
+   liked, or skipped.
+3. Scoring the remaining people based on shared courses and
+   similar age.
+4. Returning a final list, sorted with the best matches first.
+RT: This function is called by the HTMX views every time a
+user "likes" or "skips" someone on the Discover page.
+"""
 def find_matches(user):
     
     # Finds potential matches for a given user, excluding existing buddies,
@@ -52,3 +67,4 @@ def find_matches(user):
 
     # Sorts matches by score, highest first
     return sorted(matches_with_scores, key=lambda k: k['score'], reverse=True)
+

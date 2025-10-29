@@ -1,10 +1,22 @@
 # accounts/models.py
 
+# Import models from django.db because this file defines database models.
 from django.db import models
+# Import AbstractUser from django.contrib.auth.models because 'User' is based on it.
 from django.contrib.auth.models import AbstractUser
+# Import CustomUserManager from .managers because the 'User' model needs it.
 from .managers import CustomUserManager
+# Import Course from rooms.models because 'User' needs a relation to it.
 from rooms.models import Course
 
+"""
+Author:
+This class defines the main "User" account for the entire
+application. It's customized to use an email address instead
+of a username for logging in. It also stores the user's
+personal info (name, age), what courses they are in, and
+a list of their "buddies" (other users they have matched with).
+"""
 class User(AbstractUser):
     # Custom setup to use email instead of username
     username = None
@@ -25,6 +37,13 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
+"""
+Author:
+This class holds extra information that is attached to a
+User account. It's connected one-to-one with a User and
+stores their personal "bio". It also has a helper function
+to easily find the URL of the user's main profile picture.
+"""
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
@@ -39,6 +58,13 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.email} Profile'
 
+"""
+Author:
+This class represents a single picture that a user has
+uploaded to their profile. It links the image file to the
+user's profile and includes a flag ('is_main') to mark
+which picture should be their main display photo.
+"""
 class ProfileImage(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='profile_images/')
@@ -48,6 +74,15 @@ class ProfileImage(models.Model):
     def __str__(self):
         return f"Image for {self.profile.user.email}"
 
+"""
+Author:
+This class represents a "Like" from the Discover page. It
+records who gave the like ('from_user') and who received it
+('to_user'). These records are checked to see if a
+mutual match has occurred.
+RT: This table is created and checked by the real-time HTMX
+views on the Discover page.
+"""
 # This new model will track "likes" from the Discover page.
 class Like(models.Model):
     from_user = models.ForeignKey(User, related_name='likes_given', on_delete=models.CASCADE)
@@ -60,6 +95,17 @@ class Like(models.Model):
     def __str__(self):
         return f"{self.from_user.first_name} likes {self.to_user.first_name}"
 
+"""
+Author:
+This class tracks every action a user takes on the Discover
+page (both "Likes" and "Skips"). This does two things:
+1. It prevents a user from seeing the same person again
+   in Discover.
+2. It creates a "history" that allows a user to undo their
+   last action.
+RT: This table is written to by the HTMX "like" and "skip"
+views and read by the HTMX "undo" view.
+"""
 class SkippedMatch(models.Model):
     ACTION_CHOICES = (
         ('skip', 'Skip'),
@@ -78,3 +124,4 @@ class SkippedMatch(models.Model):
 
     def __str__(self):
         return f"{self.from_user.first_name} {self.action_type}d {self.skipped_user.first_name}"
+

@@ -1,7 +1,17 @@
 # accounts/managers.py
 
+# Import BaseUserManager from django.contrib.auth.base_user because 'CustomUserManager' is based on it.
 from django.contrib.auth.base_user import BaseUserManager
 
+"""
+Author:
+This class provides the core logic for how user accounts are
+created. It overrides Django's default behavior to use an
+email address as the main login identifier instead of a username.
+It contains two main functions: one for creating a regular
+user ('create_user') and one for creating an administrator
+('create_superuser').
+"""
 class CustomUserManager(BaseUserManager):
     
     # Custom user model manager where email is the unique identifier for authentication instead of usernames
@@ -31,3 +41,4 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
+
