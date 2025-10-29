@@ -46,13 +46,17 @@
                     </button>
                 </li>
                 
-                {% if user.profile.main_image_url %}
                 <li>
                   <a href="{% url 'my_profile' %}">
-                    <img src="{{ user.profile.main_image_url }}" alt="My Profile" class="nav-profile-pic">
+                    {% if user.profile.main_image_url %}
+                      <img src="{{ user.profile.main_image_url }}" alt="My Profile" class="nav-profile-pic">
+                    {% else %}
+                      <div class="nav-profile-pic nav-profile-placeholder">
+                        <span>{{ user.first_name.0 }}</span>
+                      </div>
+                    {% endif %}
                   </a>
                 </li>
-                {% endif %}
             </ul>
         </nav>
     </header>
