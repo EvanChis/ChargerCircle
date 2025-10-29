@@ -6,7 +6,7 @@ from .models import Message
 from .constants import SESSION_INVITE_PREFIX
 
 """
-Author:
+Author: Evan and Oju
 This function is a "context processor," which means it runs
 on almost every page load. Its job is to check the database
 for any un-answered session invites for the currently logged-in

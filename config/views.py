@@ -4,7 +4,7 @@
 from django.shortcuts import render, redirect
 
 """
-Author:
+Author: Evan
 This function handles the main home page ('/') of the website.
 It checks if the user is already logged in. If they are, it
 sends them straight to their dashboard. If they are not logged

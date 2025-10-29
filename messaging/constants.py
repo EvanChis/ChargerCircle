@@ -1,7 +1,7 @@
 # messaging/constants.py
 
 """
-Author:
+Author: Evan and Oju
 This file holds simple, reusable text values (constants)
 that are used in multiple places within the 'messaging' app.
 Using constants like this makes the code easier to update

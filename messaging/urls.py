@@ -6,7 +6,7 @@ from django.urls import path
 from .views import inbox_view
 
 """
-Author:
+Author: Cole
 This file defines the web addresses (URLs) for the 'messaging'
 app. It maps the URL for the main inbox page and the URL for a
 specific conversation to the 'inbox_view' function, which handles

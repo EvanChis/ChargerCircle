@@ -191,7 +191,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 """
-Author:
+Author: Evan
 These settings define where to store "media" files, which
 are files uploaded by users (like their profile pictures).
 The 'if' statement checks if we are in production

@@ -6,7 +6,7 @@ from django.urls import path
 from . import consumers
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Oju
 This list defines the specific WebSocket addresses (URLs) that
 the rooms app will listen to. It connects URLs for general
 notifications and specific course rooms to the corresponding

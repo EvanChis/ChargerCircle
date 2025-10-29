@@ -12,7 +12,7 @@ from .views import (
 )
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Angie
 This file is the "address book" for the 'rooms' application.
 It maps specific web addresses (URLs) related to courses,
 threads, posts, and sessions to the correct Python function

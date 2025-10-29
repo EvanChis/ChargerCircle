@@ -10,7 +10,7 @@ from .managers import CustomUserManager
 from rooms.models import Course
 
 """
-Author:
+Author: Evan
 This class defines the main "User" account for the entire
 application. It's customized to use an email address instead
 of a username for logging in. It also stores the user's
@@ -38,7 +38,7 @@ class User(AbstractUser):
         return self.email
 
 """
-Author:
+Author: Evan
 This class holds extra information that is attached to a
 User account. It's connected one-to-one with a User and
 stores their personal "bio". It also has a helper function
@@ -59,7 +59,7 @@ class Profile(models.Model):
         return f'{self.user.email} Profile'
 
 """
-Author:
+Author: Evan
 This class represents a single picture that a user has
 uploaded to their profile. It links the image file to the
 user's profile and includes a flag ('is_main') to mark
@@ -75,7 +75,7 @@ class ProfileImage(models.Model):
         return f"Image for {self.profile.user.email}"
 
 """
-Author:
+Author: Evan
 This class represents a "Like" from the Discover page. It
 records who gave the like ('from_user') and who received it
 ('to_user'). These records are checked to see if a

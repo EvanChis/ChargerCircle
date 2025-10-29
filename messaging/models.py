@@ -6,7 +6,7 @@ from django.db import models
 from django.conf import settings
 
 """
-Author:
+Author: Cole
 This class represents a single conversation thread between two
 or more users. It primarily keeps track of who is involved
 in the conversation ('participants') and when the last message
@@ -23,7 +23,7 @@ class MessageThread(models.Model):
         return f"Thread between {self.participants.count()} users"
 
 """
-Author:
+Author: Cole
 This class represents a single message within a MessageThread.
 It stores the actual text content of the message, who sent it
 ('sender'), and exactly when it was sent ('timestamp'). It's

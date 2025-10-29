@@ -10,7 +10,7 @@ from datetime import timedelta
 from rooms.models import Session
 
 """
-Author:
+Author: Evan
 This class defines a custom command that can be run from the
 server's command line (using 'python manage.py cleanup_sessions').
 Its purpose is to automatically clean up the database by finding

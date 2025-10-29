@@ -158,7 +158,7 @@ def undo_action_view(request, pk):
     return HttpResponse('')
 
 """
-Author: Evan
+Author: Oju
 This function loads the "Buddies" page. It gathers the user's
 buddy list and their recent actions that can be undone.
 RT: Fetches the list of currently online users to display the
@@ -259,7 +259,7 @@ def skip_match_view(request, pk):
         return render(request, 'accounts/partials/no_more_matches.html')
 
 """
-Author: Evan
+Author: Oju
 This function shows the "Your Sessions" page, which lists
 all the study sessions the user has joined.
 """

@@ -14,7 +14,7 @@ from .models import Message, MessageThread
 User = get_user_model()
 
 """
-Author:
+Author: Oju
 This class is the "brain" for the real-time private chat. It
 handles the WebSocket connection for a single chat thread. It
 manages users connecting, disconnecting, sending messages, and
@@ -23,7 +23,6 @@ RT: This entire class is for real-time chat functionality.
 """
 class ChatConsumer(AsyncWebsocketConsumer):
     """
-    Author:
     This function runs the moment a user opens a chat window.
     It gets the thread ID from the URL, creates a unique
     "group name" for that chat room, and adds the user's
@@ -41,7 +40,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     """
-    Author:
     This function runs when the user closes the chat window
     or disconnects. It removes the user's connection from the
     chat room's "group," so they no longer receive messages.
@@ -54,7 +52,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     """
-    Author:
     This function runs every time the server receives a
     message *from* the user's browser (e.g., they hit "Send"
     or start typing). It checks if the message is a "typing"
@@ -97,7 +94,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 print(f"ERROR in ChatConsumer: {e}")
 
     """
-    Author:
     This function is called when the server's broadcast
     system (the "group") gets a 'chat_message' to send out.
     It takes that message and pushes it down the WebSocket
@@ -113,7 +109,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     """
-    Author:
     This function is called when the broadcast system gets a
     'typing_indicator' to send. It pushes the "is typing"
     notification down the WebSocket to the user's browser.
@@ -126,7 +121,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
     
     """
-    Author:
     This is a helper function that safely saves a new
     message to the database from within the async code.
     RT: This is an async helper for the real-time 'receive' function.
@@ -138,7 +132,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return new_message
 
     """
-    Author:
     This is a helper function that safely gets a User object
     from the database from within the async code.
     RT: This is an async helper for the real-time 'receive' function.
@@ -148,7 +141,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return User.objects.get(pk=user_id)
         
     """
-    Author:
     This is a helper function that safely gets a MessageThread
     object from the database from within the async code.
     RT: This is an async helper for the real-time 'receive' function.

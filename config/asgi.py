@@ -18,7 +18,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django_asgi_app = get_asgi_application()
 
 """
-Author:
+Author: Evan
 This file is the main entry-point for the server. It acts as
 a traffic controller that splits incoming connections.
 It sends all normal web page (HTTP) requests to Django, and

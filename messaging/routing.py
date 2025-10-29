@@ -6,7 +6,7 @@ from django.urls import re_path
 from . import consumers
 
 """
-Author:
+Author: Oju
 This list defines the specific WebSocket addresses (URLs) that
 the messaging app will listen to. It connects the URL for a
 chat thread (like '/ws/chat/123/') to the 'ChatConsumer' code

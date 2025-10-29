@@ -14,7 +14,7 @@ from django.http import HttpResponse
 from .views import home_view
 
 """
-Author:
+Author: Evan
 This is the master "address book" for the entire project.
 It defines the main URL patterns for the whole site. It mostly
 just directs traffic to the more specific 'urls.py' files
@@ -34,7 +34,7 @@ urlpatterns = [
 ]
 
 """
-Author:
+Author: Evan
 This block of code is a helper just for local development.
 It tells Django how to serve user-uploaded files (like
 profile pictures) so we can see them on the local test

@@ -34,7 +34,7 @@ from asgiref.sync import async_to_sync # lets sync code call async functions
 from core.utils import get_online_user_ids # helper to check who is online
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Angie
 This helper function counts how many pending session invites
 a user has received but not yet responded to.
 RT: This count is used to update the real-time notification badge.
@@ -157,7 +157,7 @@ def thread_detail_view(request, slug, pk):
     return render(request, 'rooms/thread_detail.html', context)
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Oju
 This function handles editing an existing post. When requested
 via GET, it returns the HTML form pre-filled with the post's
 content. When the form is submitted via POST, it saves the
@@ -223,7 +223,7 @@ def delete_post_view(request, pk):
     return HttpResponse('')
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
 This function handles the creation of a new live study session.
 It displays the form on GET and processes it on POST. When a
 session is created, it adds the host as a participant, finds or
@@ -293,7 +293,7 @@ def create_session_view(request):
     return render(request, 'rooms/create_session.html', {'form': form})
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
 This function handles a user clicking "Accept" on a session
 invite within the chat. It adds the user to the session's
 participants, updates the original invite message to show it
@@ -333,7 +333,7 @@ def accept_session_invite(request, session_id, message_id):
     return render(request, 'messaging/partials/message_content.html', {'message': message})
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
 This function handles a user clicking "Decline" on a session
 invite within the chat. It updates the original invite message
 to show it was declined and sends a notification to update the
@@ -369,7 +369,7 @@ def decline_session_invite(request, session_id, message_id):
     return render(request, 'messaging/partials/message_content.html', {'message': message})
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Oju
 This function displays the detail page for a specific live session.
 It shows the session topic, host, and the list of participants.
 RT: It fetches the list of currently online users to display the
@@ -394,7 +394,7 @@ def session_detail_view(request, pk):
     return render(request, 'rooms/session_detail.html', context)
 
 """
-Author: Angie
+Author: Oju
 This function allows the host of a session to delete it.
 It performs a security check to ensure only the host can
 delete, then removes the session from the database and

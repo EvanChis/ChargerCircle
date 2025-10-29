@@ -6,7 +6,7 @@ from django.db.models import Count
 from .models import MessageThread
 
 """
-Author:
+Author: Cole
 This is a helper function used whenever a message needs to be
 sent between a specific group of users (e.g., when two people
 match, or when sending a session invite). It first checks if a

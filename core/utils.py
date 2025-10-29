@@ -7,7 +7,7 @@ from django.core.cache import cache
 ONLINE_USERS_CACHE_KEY = 'online_users'
 
 """
-Author:
+Author: Evan
 This is a simple helper function used by many pages (like "Buddies"
 and "Sessions"). Its only job is to quickly get the list of
 all currently online users from the server's memory (cache).

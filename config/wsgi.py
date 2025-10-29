@@ -6,7 +6,7 @@ import os
 from django.core.wsgi import get_wsgi_application
 
 """
-Author:
+Author: Evan
 This file is the entry-point for the web server when it's running
 in WSGI mode (the standard way Django handles normal, non-real-time
 web requests). It tells the server where to find the main

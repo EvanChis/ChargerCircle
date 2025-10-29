@@ -6,7 +6,7 @@ from django.contrib import admin
 from .models import MessageThread, Message
 
 """
-Author:
+Author: Cole
 This block of code makes the messaging database tables
 ('MessageThread' and 'Message') visible in the Django
 admin control panel. This allows an administrator to

@@ -4,7 +4,7 @@
 from django.apps import AppConfig
 
 """
-Author:
+Author: Evan
 This class tells Django that an app named "core" exists.
 This app is often used for essential, project-wide code
 (like the 'utils.py' file) that doesn't belong to just one

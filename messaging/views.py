@@ -15,7 +15,7 @@ from .forms import MessageForm
 from core.utils import get_online_user_ids
 
 """
-Author:
+Author: Cole (Original Logic) / Oju (RT Refactor)
 This function handles the main "Inbox" page where users see
 their list of conversations and can chat. It shows a list of
 all the user's message threads, sorted by the most recent

@@ -20,7 +20,7 @@ ONLINE_USERS_CACHE_KEY = 'online_users'
 offline_tasks = {}
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
+Author: Oju
 This class handles the main WebSocket connection for each user.
 It manages two key real-time features:
 1.  **Personal Notifications:** Receiving pop-up messages (like "You matched!")
@@ -30,7 +30,6 @@ RT: This entire class handles real-time notifications and user presence updates.
 """
 class NotificationConsumer(AsyncWebsocketConsumer):
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Runs when a user first connects to the site (opens a tab).
     It checks if they are logged in. If so, it adds them to their
     personal notification group and the global presence group.
@@ -63,7 +62,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Runs when the user disconnects (closes tab, navigates away).
     Instead of immediately marking them offline, it schedules a task
     to mark them offline after 10 seconds. This prevents them from
@@ -83,7 +81,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(PRESENCE_GROUP_NAME, self.channel_name)
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     This is the delayed task function. It waits 10 seconds. If the
     task hasn't been cancelled (meaning the user didn't reconnect),
     it proceeds to mark the user as offline and cleans up the task.
@@ -99,7 +96,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             del offline_tasks[self.user.pk]
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Receives a notification message sent specifically to this user's
     group and forwards it down the WebSocket to their browser.
     RT: Pushes a personal notification (like "You Matched!") to the browser.
@@ -109,7 +105,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({'type': 'notification', 'message': event['message']}))
     
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Receives a presence update message (someone went online/offline)
     sent to the global presence group and forwards it down the WebSocket
     to this user's browser.
@@ -124,7 +119,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         }))
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Updates the central list of online users (stored in the cache)
     and then broadcasts the change (online/offline status) to everyone
     connected to the global presence group.
@@ -140,7 +134,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         )
     
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     A helper function that safely adds or removes a user's ID
     from the set of online users stored in the server's cache.
     RT: Async helper to interact with the cache for presence data.
@@ -158,7 +151,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
 
 """
-Author: Angie (Original Logic) / Oju (RT Refactor)
 This class handles the real-time updates within a specific
 course room page (the page showing discussion threads). It allows
 newly created threads and posts to appear instantly for everyone
@@ -167,7 +159,6 @@ RT: This entire class is for real-time updates in course room discussions.
 """
 class RoomConsumer(AsyncWebsocketConsumer):
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Runs when a user opens a specific course room page. It gets the
     room's unique identifier ('slug') from the URL, creates a unique
     group name for that room, and adds the user's connection to that
@@ -183,7 +174,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         await self.accept() # Accept the WebSocket connection
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Runs when the user leaves the course room page or disconnects.
     It removes their connection from the course room's group so they
     no longer receive live updates for that room.
@@ -194,7 +184,6 @@ class RoomConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     """
-    Author: Angie (Original Logic) / Oju (RT Refactor)
     Receives a message (containing HTML for a new thread or post)
     that was broadcast to this course room's group and forwards it
     down the WebSocket to the user's browser, where JavaScript will

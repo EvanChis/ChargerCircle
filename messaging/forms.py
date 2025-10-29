@@ -6,7 +6,7 @@ from django import forms
 from .models import Message
 
 """
-Author:
+Author: Oju
 This class defines the form used for typing and sending a
 new message in the chat window. It's based directly on the
 'Message' database model, specifically using only the 'content'
