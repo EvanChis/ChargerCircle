@@ -1,5 +1,7 @@
 # accounts/views.py
 
+import json # for making green online dot independent so it doesn't flash
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
@@ -32,6 +34,10 @@ def check_for_match(user1, user2):
         # Cleans up the Like objects
         Like.objects.filter(from_user=user1, to_user=user2).delete()
         Like.objects.filter(from_user=user2, to_user=user1).delete()
+
+        # Cleans up the corresponding SkippedMatch "like" entries
+        SkippedMatch.objects.filter(from_user=user1, skipped_user=user2, action_type='like').delete()
+        SkippedMatch.objects.filter(from_user=user2, skipped_user=user1, action_type='like').delete()
         
         # Creates a message thread for the matched users
         get_or_create_message_thread([user1, user2])
@@ -57,7 +63,14 @@ def like_user_view(request, pk):
     liked_user = get_object_or_404(User, pk=pk)
     
     if liked_user != request.user:
+        # Create a Like object and an undoable action
         Like.objects.get_or_create(from_user=request.user, to_user=liked_user)
+        # prevents duplicates if user skips then likes
+        SkippedMatch.objects.update_or_create(
+            from_user=request.user, 
+            skipped_user=liked_user, 
+            defaults={'action_type': 'like'}
+        )
         check_for_match(request.user, liked_user)
 
     matches = find_matches(request.user)
@@ -72,46 +85,38 @@ def like_user_view(request, pk):
 def remove_buddy(request, pk):
     buddy_to_remove = get_object_or_404(User, pk=pk)
     
-    # Removes the match
+    # This is now a permanent removal
     request.user.buddies.remove(buddy_to_remove)
     buddy_to_remove.buddies.remove(request.user)
     
-    # Creates a SkippedMatch entry so they don't see each other in Discover
-    # Creates one for the current user so they can undo it.
-    skipped_entry = SkippedMatch.objects.create(from_user=request.user, skipped_user=buddy_to_remove)
-    
-    # Also creates a reverse entry so the other user doesn't see them either
-    SkippedMatch.objects.get_or_create(from_user=buddy_to_remove, skipped_user=request.user)
-    
-    # Renders the "undo" item to be sent out-of-band
-    undo_item_html = render_to_string(
-        'accounts/partials/undo_item.html',
-        {'skipped': skipped_entry},
-        request=request
+    # SkippedMatch entries are created to prevent them from seeing each other again.
+    # Using action_type='remove' so these don't show up in the undo list
+    SkippedMatch.objects.get_or_create(
+        from_user=request.user, 
+        skipped_user=buddy_to_remove,
+        defaults={'action_type': 'remove'}
+    )
+    SkippedMatch.objects.get_or_create(
+        from_user=buddy_to_remove, 
+        skipped_user=request.user,
+        defaults={'action_type': 'remove'}
     )
     
-    # Returns an empty response for the buddy list item, and the OOB item
-    response = HttpResponse()
-    response.write(f'<div hx-swap-oob="afterbegin:#undo-list">{undo_item_html}</div>')
-    return response
+    # We return an empty response because the item is now gone permanently.
+    return HttpResponse('')
 
 @login_required
 @require_POST
 def undo_action_view(request, pk):
-    skipped_entry = get_object_or_404(SkippedMatch, pk=pk, from_user=request.user)
+    # This view now handles both "likes" and "skips"
+    action_to_undo = get_object_or_404(SkippedMatch, pk=pk, from_user=request.user)
     
-    # Checks for buddy removal
-    try:
-        reverse_entry = SkippedMatch.objects.get(from_user=skipped_entry.skipped_user, skipped_user=request.user)
-        # Restores a match
-        request.user.buddies.add(skipped_entry.skipped_user)
-        skipped_entry.skipped_user.buddies.add(request.user)
-        reverse_entry.delete()
-    except SkippedMatch.DoesNotExist:
-        # Wasn't a previous match so no match to restore
-        pass
-
-    skipped_entry.delete()
+    if action_to_undo.action_type == 'like':
+        # If it was a "like", we delete the corresponding Like object.
+        Like.objects.filter(from_user=request.user, to_user=action_to_undo.skipped_user).delete()
+    
+    # For both likes and skips, we delete the SkippedMatch record.
+    action_to_undo.delete()
 
     # Re-render buddy list and undo list
     buddy_list = request.user.buddies.all()
@@ -122,7 +127,11 @@ def undo_action_view(request, pk):
         request=request
     )
     
-    last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
+    # Only show undoable actions from discover page (like/skip), not buddy removals
+    last_skipped = SkippedMatch.objects.filter(
+        from_user=request.user,
+        action_type__in=['like', 'skip']
+    )[:10]
     undo_list_html = render_to_string(
         'accounts/partials/undo_list.html',
         {'last_skipped': last_skipped},
@@ -140,12 +149,17 @@ def undo_action_view(request, pk):
 def buddies_view(request):
     buddy_list = request.user.buddies.all()
     online_user_ids = get_online_user_ids()
-    last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
+    # Only show undoable actions from discover page (like/skip), not buddy removals
+    last_skipped = SkippedMatch.objects.filter(
+        from_user=request.user,
+        action_type__in=['like', 'skip']
+    )[:10]
 
     context = {
         'buddy_list': buddy_list,
         'online_user_ids': online_user_ids,
         'last_skipped': last_skipped,
+        'online_user_ids_json': json.dumps(list(online_user_ids)),
     }
     return render(request, 'accounts/buddies.html', context)
 
@@ -186,7 +200,12 @@ def discover_view(request):
 @require_POST
 def skip_match_view(request, pk):
     skipped_user = get_object_or_404(User, pk=pk)
-    SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=skipped_user)
+    # handles case where user likes then skips
+    SkippedMatch.objects.update_or_create(
+        from_user=request.user, 
+        skipped_user=skipped_user,
+        defaults={'action_type': 'skip'}
+    )
     matches = find_matches(request.user)
     next_match = matches[0] if matches else None
     if next_match:

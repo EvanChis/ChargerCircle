@@ -1,5 +1,7 @@
 # rooms/views.py
 
+import json # for making green online dot independent so it doesn't flash
+
 from django.shortcuts import render, get_object_or_404, redirect
 # render: show an HTML page
 # get_object_or_404: fetch an item or return 404 if not found
@@ -209,7 +211,11 @@ def session_detail_view(request, pk):
     if request.user not in session.participants.all():
         return HttpResponseForbidden("You are not a participant of this session.")
     online_user_ids = get_online_user_ids()
-    context = {'session': session, 'online_user_ids': online_user_ids, }
+    context = {
+        'session': session,
+        'online_user_ids': online_user_ids,
+        'online_user_ids_json': json.dumps(list(online_user_ids)),
+    }
     return render(request, 'rooms/session_detail.html', context)
 
 # Deletes a session

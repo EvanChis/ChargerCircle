@@ -61,9 +61,16 @@ class Like(models.Model):
         return f"{self.from_user.first_name} likes {self.to_user.first_name}"
 
 class SkippedMatch(models.Model):
-    from_user = models.ForeignKey(User, related_name='skipper', on_delete=models.CASCADE)
-    skipped_user = models.ForeignKey(User, related_name='was_skipped_by', on_delete=models.CASCADE)
+    ACTION_CHOICES = (
+        ('skip', 'Skip'),
+        ('like', 'Like'),
+        ('remove', 'Remove'),
+    )
+    from_user = models.ForeignKey(User, related_name='actions', on_delete=models.CASCADE)
+    skipped_user = models.ForeignKey(User, related_name='was_actioned_by', on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    action_type = models.CharField(max_length=6, choices=ACTION_CHOICES, default='skip')
+
 
     class Meta:
         # Ensures we don't have duplicate skip entries
@@ -71,4 +78,4 @@ class SkippedMatch(models.Model):
         ordering = ['-timestamp'] # Part of Undo
 
     def __str__(self):
-        return f"{self.from_user.first_name} skipped or removed {self.skipped_user.first_name}"
+        return f"{self.from_user.first_name} {self.action_type}d {self.skipped_user.first_name}"

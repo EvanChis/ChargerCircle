@@ -1,5 +1,7 @@
 # messaging/views.py
 
+import json # for making green online dot independent so it doesn't flash
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import MessageThread
@@ -8,10 +10,8 @@ from core.utils import get_online_user_ids
 
 @login_required
 def inbox_view(request, thread_id=None):
-    # Gets all threads the user is a part of
     my_threads = request.user.message_threads.all().order_by('-updated_at')
     
-    # Prepares the list of other participants for each thread
     for thread in my_threads:
         thread.other_participants = thread.participants.exclude(id=request.user.id)
 
@@ -24,7 +24,6 @@ def inbox_view(request, thread_id=None):
         if request.user not in selected_thread.participants.all():
             return redirect('inbox')
         
-        # Adds other participants to the selected thread object as well
         selected_thread.other_participants = selected_thread.participants.exclude(id=request.user.id)
         messages = selected_thread.messages.all().order_by('timestamp')
 
@@ -36,5 +35,6 @@ def inbox_view(request, thread_id=None):
         'messages': messages,
         'form': form,
         'online_user_ids': online_user_ids,
+        'online_user_ids_json': json.dumps(list(online_user_ids)),
     }
     return render(request, 'messaging/inbox.html', context)

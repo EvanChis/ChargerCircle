@@ -2,10 +2,7 @@
   {% for participant in session.participants.all %}
     <li class="user-presence-container" data-user-pk="{{ participant.pk }}">
       <a href="{% url 'profile' pk=participant.pk %}" class="user-name">
-        {{ participant.first_name }} {{ participant.last_name }}
-        {% if participant.pk in online_user_ids %}
-          <span class="online-indicator"></span>
-        {% endif %}
+        {{ participant.first_name }} {{ participant.last_name }}<span class="online-indicator"></span>
       </a>
     </li>
   {% endfor %}

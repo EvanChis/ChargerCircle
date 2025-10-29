@@ -1,6 +1,6 @@
 <ul class="styled-list" id="buddy-list">
   {% for buddy in buddy_list %}
-    <li id="buddy-{{ buddy.pk }}" class="buddy-list-item">
+    <li id="buddy-{{ buddy.pk }}" class="buddy-list-item user-presence-container" data-user-pk="{{ buddy.pk }}">
       <div class="buddy-info">
         {% if buddy.profile.main_image_url %}
           <img src="{{ buddy.profile.main_image_url }}" alt="{{ buddy.first_name }}" class="buddy-list-avatar">
@@ -9,11 +9,7 @@
             <span>{{ buddy.first_name.0 }}</span>
           </div>
         {% endif %}
-        <a href="{% url 'profile' pk=buddy.pk %}" class="user-name"> {{ buddy.first_name }} {{ buddy.last_name }}
-          {% if buddy.pk in online_user_ids %}
-            <span class="online-indicator"></span>
-          {% endif %}
-        </a>
+        <a href="{% url 'profile' pk=buddy.pk %}" class="user-name"> {{ buddy.first_name }} {{ buddy.last_name }}<span class="online-indicator"></span></a>
       </div>
       <form hx-post="{% url 'remove_buddy' pk=buddy.pk %}" 
             hx-target="#buddy-{{ buddy.pk }}" 

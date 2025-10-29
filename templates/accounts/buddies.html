@@ -16,7 +16,8 @@
   </div>
 
   <h3>Undo Last Actions</h3>
-  <div id="undo-list-container">
+  {% comment %} This container is no longer needed for out-of-band swaps, but is kept for structure. {% endcomment %}
+  <div id="undo-list-container"> 
       {% include "accounts/partials/undo_list.html" %}
   </div>
 </div>
