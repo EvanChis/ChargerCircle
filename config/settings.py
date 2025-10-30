@@ -10,7 +10,7 @@ import dj_database_url
 from dotenv import load_dotenv
 
 """
-Author:
+Author: Evan
 This is the main configuration file for the entire Django project.
 It's like the central control panel that tells the application
 what features to turn on, what apps to use, how to connect to
@@ -33,7 +33,7 @@ DEBUG = os.getenv('DEBUG', '1') == '1'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 """
-Author:
+Author: Evan
 This list tells Django which "apps" or "features" are
 turned on for this project. This includes Django's built-in
 apps (like 'admin', 'auth'), third-party apps we added
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
 ]
 
 """
-Author:
+Author: Evan
 Middleware are layers of security and functionality that
 process every request and response. This list includes
 things for security (like 'CsrfViewMiddleware') and for
@@ -82,7 +82,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'config.urls'
 
 """
-Author:
+Author: Evan
 This setting tells Django where to find the HTML template
 files that create the web pages. It also lists "context
 processors," which are helpers that make certain data
@@ -111,7 +111,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 """
-Author:
+Author: Evan
 This setting tells Django to use the 'asgi.py' file as the
 main entry point, which allows the server to handle both
 regular HTTP requests and real-time WebSocket traffic.
@@ -122,7 +122,7 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 
 """
-Author:
+Author: Evan
 This setting tells the application how to connect to the
 database. It's set up to read a 'DATABASE_URL' from the
 .env file, which makes it easy to switch between a local
@@ -134,7 +134,7 @@ DATABASES = {
 }
 
 """
-Author:
+Author: Evan
 This setting configures the "live-messaging" system
 (Channels) that allows the application to send real-time
 notifications and chat messages between different users.
@@ -154,7 +154,7 @@ CHANNEL_LAYERS = {
 }
 
 """
-Author:
+Author: Evan
 This setting tells Django to use our custom 'User' model
 (defined in 'accounts/models.py') for handling all user
 accounts, instead of Django's default built-in one. This
@@ -178,17 +178,19 @@ USE_I18N = True
 USE_TZ = True
 
 """
-Author:
+Author: Evan
 These settings tell Django where to find, collect, and
 serve the "static" files. These are files like CSS,
 JavaScript, and basic images that don't change.
 'whitenoise' is used to serve these files efficiently.
 """
 # Static files (CSS, JavaScript, Images)
+# These settings are for WhiteNoise, which handles CSS and JS.
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 """
 Author: Evan
@@ -200,20 +202,42 @@ save files to an S3 bucket instead of the local server.
 """
 # Media files (User Uploads)
 if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
-    # Production Media Storage (S3)
+    # --- START OF AWS S3 PRODUCTION SETTINGS ---
+    
+    # 1. Set Storage Backends
     STORAGES = {
         "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"},
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
     }
+
+    # 2. Get Bucket and Region from .env
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+    # 3. Explicitly configure Boto3 (for the 'default' media storage)
+    AWS_S3_REGION = AWS_S3_REGION_NAME
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_ADDRESSING_STYLE = 'virtual' # Use bucket.s3.region... format
+    
+    # 4. Set S3 Object Parameters
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    
+    # 5. Make all user-uploaded files public
+    AWS_DEFAULT_ACL = 'public-read'
+    
+    # 6. Set MEDIA_URL to point to S3
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/media/'
+
+    # --- END OF AWS S3 PRODUCTION SETTINGS ---
+
 else:
-    # Local Development Media Storage
+    # --- START OF LOCAL DEVELOPMENT SETTINGS ---
+    
+    # 'default' storage is local file system
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
+    
+    # --- END OF LOCAL DEVELOPMENT SETTINGS ---
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
