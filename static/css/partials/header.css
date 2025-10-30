@@ -1,4 +1,3 @@
-/* Evan */
 /* Header and Navigation Styles */
 .main-header { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(var(--header-bg-rgb) / 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1); z-index: 1000; height: 60px; }
 .main-nav { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; height: 100%; }
