@@ -3,7 +3,7 @@
 # Import forms from django because this file defines web forms.
 from django import forms
 # Import UserCreationForm from django.contrib.auth.forms because 'CustomUserCreationForm' is based on it.
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 # Import models from .models because 'User', 'ProfileImage', and 'Course' are needed for the forms.
 from .models import User, ProfileImage, Course
 
@@ -54,3 +54,18 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'age']
+
+class CustomPasswordResetForm(PasswordResetForm):
+    """Custom password reset form with better styling"""
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email address',
+            'autofocus': True
+        }),
+        label='Email Address'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})

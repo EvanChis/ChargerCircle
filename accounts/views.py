@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, get_user_model
 # Import login_required from django.contrib.auth.decorators because most views in this file need it.
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 # Import HttpResponse from django.http because 'remove_buddy', 'undo_action_view' need it.
 from django.http import HttpResponse
 # Import require_POST from django.views.decorators.http because several views need it.
@@ -18,10 +19,11 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 # Import render_to_string from django.template.loader because (it's needed to turn HTML templates into strings).
 from django.template.loader import render_to_string
+from django.contrib import messages
 
 
 # Import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm from .forms because 'signup_view' and 'edit_profile_view' need them.
-from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm
+from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm, CustomPasswordResetForm
 # Import find_matches from .services because 'like_user_view', 'discover_view', 'skip_match_view' need it.
 from .services import find_matches
 # Import ProfileImage, SkippedMatch, Like from .models because many views need them.
@@ -395,3 +397,25 @@ def delete_profile_image(request, pk):
     context = get_profile_editor_context(request)
     # RT: This sends back an HTML partial for HTMX to swap
     return render(request, 'accounts/partials/profile_editor.html', context)
+
+# Password Reset Views
+class PasswordResetView(auth_views.PasswordResetView):
+    """Custom password reset view with our template"""
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    form_class = CustomPasswordResetForm
+    success_url = '/accounts/password_reset/done/'
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    """Password reset email sent confirmation"""
+    template_name = 'accounts/password_reset_done.html'
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    """Password reset form with new password"""
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = '/accounts/password_reset/complete/'
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    """Password reset successful confirmation"""
+    template_name = 'accounts/password_reset_complete.html'
