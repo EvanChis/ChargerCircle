@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% comment %} Author: Evan {% endcomment %}
 {% comment %} HTMX: This page uses HTMX for the profile picture management section.
       When a user uploads a new image, deletes an image, or sets an image
@@ -5,7 +7,6 @@
       image gallery section ('profile-editor-wrapper') without needing
       to reload the entire page. {% endcomment %}
 
-{% extends "base.html" %}
 
 {% block content %}
 <div class="content-wrapper">

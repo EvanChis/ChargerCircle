@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% comment %} Author: Cole {% endcomment %}
 {% comment %} HTMX: This page displays the user's private messages. It uses HTMX
       within session invite messages to allow users to accept or decline
@@ -6,7 +8,6 @@
       WebSockets for real-time chat messages, typing indicators, and
       displaying the online status of buddies in the sidebar and chat header. {% endcomment %}
       
-{% extends "base.html" %}
 
 {% block content %}
 <div class="messaging-container">

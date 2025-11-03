@@ -1,9 +1,10 @@
+{% extends "base.html" %}
+
 {% comment %} Author: Evan {% endcomment %}
 {% comment %} HTMX: This page does not contain specific HTMX functionality. It displays
       either the logged-in user's own profile or another user's public
       profile information. {% endcomment %}
 
-{% extends "base.html" %}
 
 {% block content %}
 <div class="content-wrapper">
@@ -22,7 +23,6 @@
 
       {% if profile_user == request.user %}
         <a href="{% url 'edit_profile' %}" class="btn btn-secondary">Edit Profile</a>
-        <a href="{% url 'password_reset' %}" class="btn btn-secondary">Change Password</a>
         <a href="{% url 'logout' %}" class="btn btn-secondary btn-danger">Logout</a>
       {% else %}
         <a href="{% url 'conversation' thread_id=thread.pk %}" class="btn btn-primary">Message</a>
