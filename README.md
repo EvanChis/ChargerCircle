@@ -21,8 +21,6 @@
 # Create your admin user for django admin priveleges:
 python manage.py createsuperuser
 
-
-
 # Now you're all set up!
 
 # In dev, mostly need:

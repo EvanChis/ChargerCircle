@@ -1,4 +1,5 @@
 # rooms/management/commands/import_events.py
+# Author: Oju
 
 import requests
 import xml.etree.ElementTree as ET  # For parsing RSS (XML)
