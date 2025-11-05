@@ -1,13 +1,17 @@
+{% comment %} Author: Evan and Oju {% endcomment %}
+{% comment %} HTMX: This partial file displays a list of recent "skip" or "like" actions. Each item has an "Undo" button that uses an HTMX POST request to reverse the action
+      and remove the item from the list without a page reload. {% endcomment %}
+
 <ul class="styled-list" id="undo-list">
     {% for skipped in last_skipped %}
-      <li id="undo-item-{{ skipped.pk }}" class="card undo-card">
+      {# The ID on this LI is no longer needed for HTMX swaps #}
+      <li class="card undo-card">
         <span>You {{ skipped.action_type }}d <strong>{{ skipped.skipped_user.first_name }} {{ skipped.skipped_user.last_name }}</strong></span>
         
         {# This form is now for a simple POST, the HTMX attributes can be removed #}
         <form hx-post="{% url 'undo_action' pk=skipped.pk %}"
-              hx-target="#undo-item-{{ skipped.pk }}"
-              hx-swap="delete"
-              data-confirm="Are you sure you want to undo this action?">
+              hx-target="closest li"
+              hx-swap="delete">
           {% csrf_token %}
           <button type="submit" class="btn btn-secondary btn-sm">Undo</button>
         </form>

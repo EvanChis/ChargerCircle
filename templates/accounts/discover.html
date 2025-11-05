@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This page is the core buddy-finding feature. It uses HTMX
+      to handle the "Like" and "Skip" actions. When a user clicks either
+      button, HTMX sends a request to the server, and the server responds
+      with the HTML for the *next* potential match's card, replacing the
+      current one without a full page reload. {% endcomment %}
+
+
 {% block content %}
 <div class="content-wrapper content-wrapper-discover">
   <h2>Discover New Buddies</h2>

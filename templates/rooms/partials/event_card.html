@@ -1,0 +1,22 @@
+{% comment %} Author: [Your Name] {% endcomment %}
+{% comment %} This partial file is the main card used on the "Events" feed. {% endcomment %}
+
+<div classs="card match-card">
+  <div class="profile-info" style="padding: 1.5rem;">
+    <h2>{{ event_data.thread.title }}</h2>
+
+    <div class="event-content" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+      {# Use linebreaksbr to render the newlines and spacing from your script #}
+      <div>{{ event_data.post.content|safe }}</div>
+    </div>
+  </div>
+
+  <div class="cta-buttons match-actions">
+    {# This button just links directly to the discussion page for this event #}
+    <a href="{% url 'thread_detail' slug=event_data.thread.course.slug pk=event_data.thread.pk %}" 
+       class="btn btn-primary" 
+       style="width: 90%;">
+      View Discussion
+    </a>
+  </div>
+</div>

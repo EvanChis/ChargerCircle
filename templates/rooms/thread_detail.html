@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Angie (Original Logic) / Oju (RT Refactor) {% endcomment %}
+{% comment %} HTMX: This page uses HTMX to allow users to edit or delete their posts directly on the page without a full reload. It also uses WebSockets to listen for new replies; when another user posts a reply, it appears in the "Replies" list instantly. {% endcomment %}
+
+
 {% block content %}
 <div class="content-wrapper" id="thread-detail-page" data-room-slug="{{ thread.course.slug|escapejs }}">
   <h2>{{ thread.title }}</h2>
@@ -20,14 +24,14 @@
           <button class="btn btn-secondary btn-sm btn-danger"
             hx-post="{% url 'delete_post' pk=original_post.id %}"
             hx-headers='{"X-HX-Redirect": "{% url 'course_detail' slug=thread.course.slug %}"}'
-            data-confirm="Are you sure? Deleting the original post will delete the entire thread.">
+            hx-confirm="Are you sure? Deleting the original post will delete the entire thread.">
             Delete Thread
           </button>
         </div>
       {% endif %}
     </div>
     <div class="post-content">
-      {{ original_post.content|linebreaks }}
+      {{ original_post.content|safe }}
     </div>
   </div>
   {% endif %}

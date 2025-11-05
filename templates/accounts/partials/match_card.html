@@ -1,3 +1,7 @@
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This partial file is the main card used on the "Discover" page. It uses HTMX to handle the "Skip" and "Like" buttons. When a button is clicked,
+    HTMX sends a request and replaces this card with the next potential match. {% endcomment %}
+
 <div class="card match-card">
   <div class="profile-image-gallery" id="profile-gallery-{{ match.user.pk }}" data-user-pk="{{ match.user.pk }}">
     {% if match.user.profile.images.all %}

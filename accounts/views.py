@@ -1,28 +1,50 @@
 # accounts/views.py
 
-import json # for making green online dot independent so it doesn't flash
+import json # Import json because 'buddies_view' needs it to pass online user data.
 
+# Import render, redirect, get_object_or_404 from django.shortcuts because almost all views need them.
 from django.shortcuts import render, redirect, get_object_or_404
+# Import login, logout, get_user_model from django.contrib.auth because 'signup_view', 'logout_view', and many views need them.
 from django.contrib.auth import login, logout, get_user_model
+# Import login_required from django.contrib.auth.decorators because most views in this file need it.
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
+# Import HttpResponse from django.http because 'remove_buddy', 'undo_action_view' need it.
 from django.http import HttpResponse
+# Import require_POST from django.views.decorators.http because several views need it.
 from django.views.decorators.http import require_POST
+# Import async_to_sync from asgiref.sync because 'check_for_match' needs it.
 from asgiref.sync import async_to_sync
+# Import get_channel_layer from channels.layers because 'check_for_match' needs it.
 from channels.layers import get_channel_layer
+# Import render_to_string from django.template.loader because (it's needed to turn HTML templates into strings).
 from django.template.loader import render_to_string
 from django.contrib import messages
 
 
+# Import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm from .forms because 'signup_view' and 'edit_profile_view' need them.
 from .forms import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm, CustomPasswordResetForm
+# Import find_matches from .services because 'like_user_view', 'discover_view', 'skip_match_view' need it.
 from .services import find_matches
+# Import ProfileImage, SkippedMatch, Like from .models because many views need them.
 from .models import ProfileImage, SkippedMatch, Like
+# Import Course, Session from rooms.models because 'signup_view' and 'sessions_view' need them.
 from rooms.models import Course, Session
+# Import get_or_create_message_thread from messaging.utils because 'check_for_match' and 'profile_view' need them.
 from messaging.utils import get_or_create_message_thread
+# Import get_online_user_ids from core.utils because 'buddies_view' needs it.
 from core.utils import get_online_user_ids
 
 User = get_user_model()
 
+"""
+Author: Evan
+This is a helper function that runs when two users have both
+liked each other. It automatically creates a "buddy" connection,
+starts a new private message thread for them, and cleans up
+the old "Like" records.
+RT: Sends a real-time "You matched!" notification to both users.
+"""
 # Helper function to check for a match and create a friendship
 def check_for_match(user1, user2):
     # Checks if user2 has also liked user1
@@ -47,16 +69,23 @@ def check_for_match(user1, user2):
         
         group_name_1 = f'notifications_for_user_{user1.pk}'
         message_1 = { 'type': 'send_notification', 'message': { 'text': f'You matched with {user2.first_name}!' } }
-        async_to_sync(channel_layer.group_send)(group_name_1, message_1)
+        async_to_sync(channel_layer.group_send)(group_name_1, message_1) # RT: Pushes a live notification
         
         group_name_2 = f'notifications_for_user_{user2.pk}'
         message_2 = { 'type': 'send_notification', 'message': { 'text': f'You matched with {user1.first_name}!' } }
-        async_to_sync(channel_layer.group_send)(group_name_2, message_2)
+        async_to_sync(channel_layer.group_send)(group_name_2, message_2) # RT: Pushes a live notification
 
         return True
     return False
 
 
+"""
+Author: Evan
+This function is called when a user clicks "Like" on the Discover
+page. It saves the "like" and then checks if it's a mutual match.
+RT: This is triggered by an HTMX request and responds by sending back
+the HTML for the *next* user card to display.
+"""
 @login_required
 @require_POST
 def like_user_view(request, pk):
@@ -76,10 +105,20 @@ def like_user_view(request, pk):
     matches = find_matches(request.user)
     next_match = matches[0] if matches else None
     if next_match:
+        # RT: This sends back an HTML partial for HTMX to swap
         return render(request, 'accounts/partials/match_card.html', {'match': next_match})
     else:
+        # RT: This sends back an HTML partial for HTMX to swap
         return render(request, 'accounts/partials/no_more_matches.html')
 
+"""
+Author: Evan
+This function is called when a user clicks the "Remove" button
+on their buddy list. It permanently removes the buddy connection
+and prevents them from being matched again.
+RT: This is triggered by an HTMX request. It returns an empty
+response, which HTMX uses to remove the item from the list.
+"""
 @login_required
 @require_POST
 def remove_buddy(request, pk):
@@ -90,21 +129,20 @@ def remove_buddy(request, pk):
     buddy_to_remove.buddies.remove(request.user)
     
     # SkippedMatch entries are created to prevent them from seeing each other again.
-    # Using action_type='remove' so these don't show up in the undo list
-    SkippedMatch.objects.get_or_create(
-        from_user=request.user, 
-        skipped_user=buddy_to_remove,
-        defaults={'action_type': 'remove'}
-    )
-    SkippedMatch.objects.get_or_create(
-        from_user=buddy_to_remove, 
-        skipped_user=request.user,
-        defaults={'action_type': 'remove'}
-    )
+    SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=buddy_to_remove)
+    SkippedMatch.objects.get_or_create(from_user=buddy_to_remove, skipped_user=request.user)
     
-    # We return an empty response because the item is now gone permanently.
+    # RT: Returns an empty response for HTMX to delete the item
     return HttpResponse('')
 
+"""
+Author: Evan
+This function is called when a user clicks the "Undo" button
+on the Buddies page. It finds the "skip" or "like" action and
+deletes it, allowing that user to show up in Discover again.
+RT: This is triggered by an HTMX request. It returns an empty
+response, which HTMX uses to remove the item from the list.
+"""
 @login_required
 @require_POST
 def undo_action_view(request, pk):
@@ -118,57 +156,46 @@ def undo_action_view(request, pk):
     # For both likes and skips, we delete the SkippedMatch record.
     action_to_undo.delete()
 
-    # Re-render buddy list and undo list
-    buddy_list = request.user.buddies.all()
-    online_user_ids = get_online_user_ids()
-    buddy_list_html = render_to_string(
-        'accounts/partials/buddy_list.html',
-        {'buddy_list': buddy_list, 'online_user_ids': online_user_ids},
-        request=request
-    )
-    
-    # Only show undoable actions from discover page (like/skip), not buddy removals
-    last_skipped = SkippedMatch.objects.filter(
-        from_user=request.user,
-        action_type__in=['like', 'skip']
-    )[:10]
-    undo_list_html = render_to_string(
-        'accounts/partials/undo_list.html',
-        {'last_skipped': last_skipped},
-        request=request
-    )
-    
-    # Return a response that updates both the buddy list and undo list
-    response = HttpResponse()
-    response.write(f'<div id="buddy-list-container" hx-swap-oob="outerHTML">{buddy_list_html}</div>')
-    response.write(f'<div id="undo-list-container" hx-swap-oob="outerHTML">{undo_list_html}</div>')
-    
-    return response
+    # RT: Returns an empty response for HTMX to delete the item
+    return HttpResponse('')
 
+"""
+Author: Oju
+This function loads the "Buddies" page. It gathers the user's
+buddy list and their recent actions that can be undone.
+RT: Fetches the list of currently online users to display the
+green "online" dots next to buddies.
+"""
 @login_required
 def buddies_view(request):
     buddy_list = request.user.buddies.all()
-    online_user_ids = get_online_user_ids()
-    # Only show undoable actions from discover page (like/skip), not buddy removals
-    last_skipped = SkippedMatch.objects.filter(
-        from_user=request.user,
-        action_type__in=['like', 'skip']
-    )[:10]
+    online_user_ids = get_online_user_ids() # RT: Fetches live presence data
+    last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
 
     context = {
         'buddy_list': buddy_list,
         'online_user_ids': online_user_ids,
         'last_skipped': last_skipped,
-        'online_user_ids_json': json.dumps(list(online_user_ids)),
+        'online_user_ids_json': json.dumps(list(online_user_ids)), # RT: Passes live data to the page
     }
     return render(request, 'accounts/buddies.html', context)
 
 
-# More views
+"""
+Author: Evan
+This function just shows the main dashboard page after a
+user logs in.
+"""
 @login_required
 def dashboard_view(request):
     return render(request, 'dashboard.html')
 
+"""
+Author: Evan
+This function handles the user sign-up page. It shows the
+form to a new user and, when they submit it, it creates
+their account, logs them in, and sends them to the dashboard.
+"""
 def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -185,10 +212,21 @@ def signup_view(request):
         form = CustomUserCreationForm()
     return render(request, 'accounts/signup.html', {'form': form})
 
+"""
+Author: Evan
+This function logs the user out of the application and sends
+them back to the public home page.
+"""
 def logout_view(request):
     logout(request)
     return redirect('home')
 
+"""
+Author: Evan
+This function shows the "Discover" page, which is where
+users can find new buddies. It finds the first available
+person for the user to see and displays their card.
+"""
 @login_required
 def discover_view(request):
     matches = find_matches(request.user)
@@ -196,6 +234,13 @@ def discover_view(request):
     context = {'match': next_match}
     return render(request, 'accounts/discover.html', context)
 
+"""
+Author: Evan
+This function is called when a user clicks "Skip" on the Discover
+page. It records the skip so the user isn't shown again.
+RT: This is triggered by an HTMX request and responds by sending back
+the HTML for the *next* user card to display.
+"""
 @login_required
 @require_POST
 def skip_match_view(request, pk):
@@ -209,15 +254,31 @@ def skip_match_view(request, pk):
     matches = find_matches(request.user)
     next_match = matches[0] if matches else None
     if next_match:
+        # RT: This sends back an HTML partial for HTMX to swap
         return render(request, 'accounts/partials/match_card.html', {'match': next_match})
     else:
+        # RT: This sends back an HTML partial for HTMX to swap
         return render(request, 'accounts/partials/no_more_matches.html')
 
+"""
+Author: Oju
+This function shows the "Your Sessions" page, which lists
+all the study sessions the user has joined.
+"""
 @login_required
 def sessions_view(request):
     my_sessions = Session.objects.filter(participants=request.user)
     context = {'my_sessions': my_sessions}
     return render(request, 'accounts/sessions.html', context)
+
+"""
+Author: Evan
+This function shows a user's profile page. It can either show
+the logged-in user's *own* profile (if no ID is given) or
+show another user's public profile. If it's another user,
+it also finds or creates the private message thread
+between them.
+"""
 @login_required
 def profile_view(request, pk=None):
     if pk:
@@ -237,6 +298,12 @@ def profile_view(request, pk=None):
     }
     return render(request, 'accounts/profile.html', context)
 
+"""
+Author: Evan
+This is a helper function that just gathers all the necessary
+information needed to display the profile editing forms, like
+the image upload form and the bio/courses form.
+"""
 def get_profile_editor_context(request):
     profile = request.user.profile
     image_form = ProfileImageForm()
@@ -247,11 +314,22 @@ def get_profile_editor_context(request):
     })
     return {'image_form': image_form, 'update_form': update_form, 'profile_images': profile_images}
 
+"""
+Author: Evan
+This function handles the "Edit Profile" page. It does two
+things:
+1. It handles the normal (non-RT) form submission for saving
+   changes to the user's bio and course list.
+2. It handles the image upload.
+RT: When a user selects a picture, it's uploaded via an HTMX
+request, and this function sends back the updated
+HTML for the image gallery.
+"""
 @login_required
 def edit_profile_view(request):
     profile = request.user.profile
     if request.method == 'POST':
-        if 'image' in request.FILES:
+        if 'image' in request.FILES: # This is the RT (HTMX) part
             image_form = ProfileImageForm(request.POST, request.FILES)
             if image_form.is_valid() and profile.images.count() < 5:
                 profile_image = image_form.save(commit=False)
@@ -260,8 +338,9 @@ def edit_profile_view(request):
                     profile_image.is_main = True
                 profile_image.save()
             context = get_profile_editor_context(request)
+            # RT: This sends back an HTML partial for HTMX to swap
             return render(request, 'accounts/partials/profile_editor.html', context)
-        else:
+        else: # This is the standard (non-RT) form part
             update_form = ProfileUpdateForm(request.POST, instance=request.user)
             if update_form.is_valid():
                 user = update_form.save(commit=False)
@@ -276,6 +355,14 @@ def edit_profile_view(request):
     context = get_profile_editor_context(request)
     return render(request, 'accounts/edit_profile.html', context)
 
+"""
+Author: Evan
+This function is called when a user clicks "Set as Main" on
+one of their profile pictures. It updates which photo is
+their main one.
+RT: This is triggered by an HTMX request and sends back the
+refreshed HTML for the entire image gallery.
+"""
 @login_required
 @require_POST
 def set_main_profile_image(request, pk):
@@ -285,8 +372,17 @@ def set_main_profile_image(request, pk):
     image.is_main = True
     image.save()
     context = get_profile_editor_context(request)
+    # RT: This sends back an HTML partial for HTMX to swap
     return render(request, 'accounts/partials/profile_editor.html', context)
 
+"""
+Author: Evan
+This function is called when a user clicks "Delete" on
+one of their profile pictures. It deletes the photo and,
+if needed, sets a new "main" photo.
+RT: This is triggered by an HTMX request and sends back the
+refreshed HTML for the entire image gallery.
+"""
 @login_required
 @require_POST
 def delete_profile_image(request, pk):
@@ -299,6 +395,7 @@ def delete_profile_image(request, pk):
         new_main.is_main = True
         new_main.save()
     context = get_profile_editor_context(request)
+    # RT: This sends back an HTML partial for HTMX to swap
     return render(request, 'accounts/partials/profile_editor.html', context)
 
 # Password Reset Views
@@ -322,6 +419,3 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
     """Password reset successful confirmation"""
     template_name = 'accounts/password_reset_complete.html'
-
-
-

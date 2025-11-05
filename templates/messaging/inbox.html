@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Cole {% endcomment %}
+{% comment %} HTMX: This page displays the user's private messages. It uses HTMX
+      within session invite messages to allow users to accept or decline
+      the invite directly within the chat window, updating the message
+      bubble without a page reload. The page also relies heavily on
+      WebSockets for real-time chat messages, typing indicators, and
+      displaying the online status of buddies in the sidebar and chat header. {% endcomment %}
+      
+
 {% block content %}
 <div class="messaging-container">
   <aside class="buddy-list-sidebar">
     <h3>Messages</h3>
     <ul class="styled-list">
       {% for thread in my_threads %}
-        <li class="user-presence-container {% if selected_thread and selected_thread.pk == thread.pk %}active{% endif %}" 
+        <li class="user-presence-container {% if selected_thread and selected_thread.pk == thread.pk %}active{% endif %}"
             data-user-pk="{% for p in thread.other_participants %}{{ p.pk }}{% endfor %}">
           <a href="{% url 'conversation' thread_id=thread.pk %}" class="user-name">
             {% if thread.other_participants|length == 1 %}
@@ -22,10 +31,10 @@
     </ul>
   </aside>
 
-  <section 
-    class="chat-window" 
+  <section
+    class="chat-window"
     {% if selected_thread %}
-      data-thread-id="{{ selected_thread.pk }}" 
+      data-thread-id="{{ selected_thread.pk }}"
       data-user-id="{{ request.user.pk }}"
       data-user-first-name="{{ request.user.first_name }}"
       data-participant-count="{{ selected_thread.participants.count }}"

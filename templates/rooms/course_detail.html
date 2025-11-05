@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Angie (Original Logic) / Oju (RT Refactor) {% endcomment %}
+{% comment %} HTMX: This page uses WebSockets (not HTMX) to receive real-time updates. When another user creates a new thread in this course room, it appears instantly at the top of the "Threads" list without needing a page refresh. {% endcomment %}
+
+
 {% block content %}
 <div class="content-wrapper" id="course-detail-page" data-room-slug="{{ course.slug|escapejs }}">
   <h2>{{ course.name }}</h2>

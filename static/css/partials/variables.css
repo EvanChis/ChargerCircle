@@ -1,6 +1,6 @@
 /* Central Design Tokens */
 :root {
-  /* --- Core Colors (as space-separated RGB components for rgba?) --- */
+  /* --- Core Colors (as space-separated RGB components for rgba) --- */
   --u-primary-rgb: 0 95 184;
   --u-accent-rgb: 0 201 255;
   --u-secondary-rgb: 108 43 217;
@@ -27,7 +27,7 @@
 --form-select-arrow-color: rgb(107, 114, 128);
 
 
-  /* --- Core Colors ??? --- */
+  /* --- Core Colors rgba versions --- */
   --u-primary-color: rgb(var(--u-primary-rgb));
   --u-accent-color: rgb(var(--u-accent-rgb));
   --u-secondary-color: rgb(var(--u-secondary-rgb));
@@ -48,7 +48,7 @@
   --form-select-arrow-color: rgb(107, 114, 128);
   --notification-badge-bg-color: rgb(239, 68, 68);
 
-  /* --- Material Design 3 Tokens (for new components) --- */
+  /* --- Material Design 3 Tokens --- */
   --u-primary: rgb(0, 95, 184);
   --u-on-primary: #ffffff;
   --u-surface-container-low: rgb(34, 42, 54);

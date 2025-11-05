@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This page does not contain any specific HTMX or real-time functionality. It is a simple welcome page with navigation links. {% endcomment %}
+
 {% block content %}
 <div class="content-wrapper center-text">
   <h1 class="kinetic-gradient">Welcome, {{ user.first_name }}!</h1>
@@ -9,7 +12,9 @@
     <a href="{% url 'my_profile' %}" class="btn">Profile</a>
     <a href="{% url 'discover' %}" class="btn">Discover</a>
     <a href="{% url 'buddies' %}" class="btn">Buddies</a>
-    <a href="{% url 'sessions' %}" class="btn">Sessions</a> <a href="{% url 'course_list' %}" class="btn">Rooms</a>
+    <a href="{% url 'sessions' %}" class="btn">Sessions</a>
+    <a href="{% url 'course_list' %}" class="btn">Rooms</a>
+    <a href="{% url 'course_detail' slug='events' %}" class="btn">Events</a>
   </div>
 </div>
 {% endblock content %}

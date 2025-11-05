@@ -5,7 +5,7 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
-# Builds paths inside the project
+# Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Loads environment variables from .env file
@@ -19,15 +19,19 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
+    'daphne', # RT: The real-time server
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party apps
-    'storages',
+    
+    # --- THIS IS THE NEW PART ---
+    'cloudinary_storage',
+    'cloudinary',
+    # --- END NEW PART ---
+    
     # Local apps
     'accounts',
     'rooms',
@@ -59,7 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'messaging.context_processors.pending_invites_count',
+                'messaging.context_processors.pending_invites_count', # RT: For live notification badge
             ],
         },
     },
@@ -97,31 +101,32 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-USE_I18N = True
+USE_I1N = True
 USE_TZ = True
+
+# --- START OF CLOUDINARY SETTINGS (DJANGO 5+) ---
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
 # Media files (User Uploads)
-if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
-    # Production Media Storage (S3)
-    STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
-        "staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"},
-    }
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-else:
-    # Local Development Media Storage
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media' 
+
+# This is the modern (Django 4.2+) way to configure storages
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+    },
+}
+
+# --- END OF CLOUDINARY SETTINGS ---
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

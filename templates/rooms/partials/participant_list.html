@@ -1,3 +1,6 @@
+{% comment %} Author: Oju {% endcomment %}
+{% comment %} HTMX: This partial file is loaded by the session detail page. It's designed to be refreshed by HTMX polling to display a live-updating list of participants and their real-time online status. {% endcomment %}
+
 <ul class="styled-list">
   {% for participant in session.participants.all %}
     <li class="user-presence-container" data-user-pk="{{ participant.pk }}">

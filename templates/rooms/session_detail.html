@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% comment %} Author: Angie (Original Logic) / Oju (RT Refactor) {% endcomment %}
+{% comment %} HTMX: This page uses HTMX to automatically refresh the participant list every 5 seconds, which updates the online status dots for each user. It also uses WebSockets to receive the live online/offline status data. {% endcomment %}
+
+
 {% block content %}
 <div class="content-wrapper">
   

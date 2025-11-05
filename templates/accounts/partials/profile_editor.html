@@ -1,3 +1,7 @@
+{% comment %} Author: Evan {% endcomment %}
+{% comment %} HTMX: This partial file handles the profile image management. It contains the image upload form (which submits via an HTMX POST) and includes the 'image_list.html' partial,
+    which has the HTMX buttons for deleting and setting a main image. {% endcomment %}
+
 <div class="card">
   {% include "accounts/partials/image_list.html" %}
 </div>
