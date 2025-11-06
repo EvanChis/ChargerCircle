@@ -63,14 +63,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message_type = data.get('type', 'chat_message')
 
+        # --- WebRTC Hangup handler ---
         if message_type == 'typing':
             # If it's a "typing" message, just broadcast it to the group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {'type': 'typing_indicator', 'sender_id': data['sender_id']}
             )
-        else:
-            # If it's a real chat message, save it to the database
+        
+        elif message_type == 'webrtc_offer':
+            # A user is sending an offer. Broadcast it.
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_receive_offer',
+                    'sender_id': data['sender_id'],
+                    'sender_first_name': data['sender_first_name'],
+                    'offer_sdp': data['offer_sdp']
+                }
+            )
+            
+        elif message_type == 'webrtc_answer':
+            # A user is sending an answer. Broadcast it.
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_receive_answer',
+                    'sender_id': data['sender_id'],
+                    'answer_sdp': data['answer_sdp']
+                }
+            )
+            
+        elif message_type == 'webrtc_ice_candidate':
+            # A user is sending a new ice candidate. Broadcast it.
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_receive_ice_candidate',
+                    'sender_id': data['sender_id'],
+                    'candidate': data['candidate'] # Pass the candidate
+                }
+            )
+            
+        elif message_type == 'webrtc_hangup':
+            # A user is hanging up. Broadcast it.
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'webrtc_receive_hangup',
+                    'sender_id': data['sender_id']
+                }
+            )
+
+        elif message_type == 'chat_message':
             message_content = data['message']
             sender_id = data['sender_id']
             sender_first_name = data['sender_first_name']
@@ -78,11 +123,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 sender = await self.get_user_instance(sender_id)
                 thread = await self.get_thread_instance(self.thread_id)
                 
-                # MODIFICATION: Only save content if it's not None
+                # Only save content if it's not None
                 if message_content:
                     await self.create_message(thread, sender, message_content)
                 
-                # (The image was already saved by the 'upload_chat_image_view')
 
                 # After saving, broadcast the new message to the group
                 await self.channel_layer.group_send(
@@ -106,7 +150,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     RT: This pushes a new chat message to the user's screen.
     """
     async def chat_message(self, event):
-        # This will now include 'image_url' if it exists.
+        # Author: Angie
+        # Includes 'image_url' if it exists.
         await self.send(text_data=json.dumps({
             'type': 'chat_message', 
             'message': event.get('message'), 
@@ -114,7 +159,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'sender_id': event['sender_id'],
             'sender_first_name': event['sender_first_name']
         }))
-        # --- END MODIFICATION ---
+
 
     """
     This function is called when the broadcast system gets a
@@ -127,6 +172,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'type': 'typing', 
             'sender_id': event['sender_id']
         }))
+    
+    
+    # --- WebRTC HANDLERS ---
+    
+    # Broadcasts the offer to the other user
+    async def webrtc_receive_offer(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_offer', 
+            'sender_id': event['sender_id'],
+            'sender_first_name': event['sender_first_name'],
+            'offer_sdp': event['offer_sdp']
+        }))
+
+    # Broadcasts the answer back to the original caller
+    async def webrtc_receive_answer(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_answer',
+            'sender_id': event['sender_id'],
+            'answer_sdp': event['answer_sdp']
+        }))
+        
+    # Broadcasts the ICE candidate to the other user
+    async def webrtc_receive_ice_candidate(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_ice_candidate',
+            'sender_id': event['sender_id'],
+            'candidate': event['candidate']
+        }))
+        
+    # Broadcasts the hangup signal to the other user
+    async def webrtc_receive_hangup(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'webrtc_hangup',
+            'sender_id': event['sender_id']
+        }))
+        
+    # --- END WebRTC HANDLERS ---
+    
     
     """
     This is a helper function that safely saves a new
@@ -156,3 +239,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_thread_instance(self, thread_id):
         return MessageThread.objects.get(pk=thread_id)
+
