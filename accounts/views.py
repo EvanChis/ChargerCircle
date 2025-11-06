@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 # Import HttpResponse from django.http because 'remove_buddy', 'undo_action_view' need it.
 from django.http import HttpResponse
+# Import models from django.db because 'buddies_view' needs Q for complex queries.
+from django.db import models
 # Import require_POST from django.views.decorators.http because several views need it.
 from django.views.decorators.http import require_POST
 # Import async_to_sync from asgiref.sync because 'check_for_match' needs it.
@@ -177,15 +179,71 @@ green "online" dots next to buddies.
 @login_required
 def buddies_view(request):
     buddy_list = request.user.buddies.all()
+    
+    # Get filter and search parameters
+    search_query = request.GET.get('search', '').strip()
+    online_filter = request.GET.get('online', '')
+    course_filter = request.GET.get('course', '')
+    sort_by = request.GET.get('sort', '')
+    
+    # Apply search filter (by name)
+    if search_query:
+        buddy_list = buddy_list.filter(
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query)
+        )
+    
+    # Apply online status filter
     online_user_ids = get_online_user_ids() # RT: Fetches live presence data
+    if online_filter == 'online':
+        buddy_list = buddy_list.filter(pk__in=online_user_ids)
+    elif online_filter == 'offline':
+        buddy_list = buddy_list.exclude(pk__in=online_user_ids)
+    
+    # Apply course filter
+    if course_filter:
+        buddy_list = buddy_list.filter(courses__slug=course_filter)
+    
+    # Apply sorting
+    if sort_by == 'name_asc':
+        buddy_list = buddy_list.order_by('first_name', 'last_name')
+    elif sort_by == 'name_desc':
+        buddy_list = buddy_list.order_by('-first_name', '-last_name')
+    
+    # Get user's courses for filter dropdown
+    from rooms.models import Course
+    user_courses = Course.objects.filter(students=request.user).exclude(slug='hang-out')
+    
     last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
 
+    # Check if any filters are active
+    has_filters = bool(search_query or online_filter or course_filter or sort_by)
+    
     context = {
         'buddy_list': buddy_list,
         'online_user_ids': online_user_ids,
         'last_skipped': last_skipped,
         'online_user_ids_json': json.dumps(list(online_user_ids)), # RT: Passes live data to the page
+        'user_courses': user_courses,
+        'search_query': search_query,
+        'online_filter': online_filter,
+        'course_filter': course_filter,
+        'sort_by': sort_by,
+        'has_filters': has_filters,
     }
+    
+    # If this is an HTMX request, return only the buddy list partial
+    if request.headers.get('HX-Request'):
+        if buddy_list:
+            return render(request, 'accounts/partials/buddy_list.html', context)
+        else:
+            # If filters are active but no results, show "no results" message
+            # Otherwise show the empty state
+            if has_filters:
+                return render(request, 'accounts/partials/buddy_list_no_results.html', context)
+            else:
+                return render(request, 'accounts/partials/buddy_list_empty.html', context)
+    
     return render(request, 'accounts/buddies.html', context)
 
 

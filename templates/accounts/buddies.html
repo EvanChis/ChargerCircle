@@ -11,6 +11,12 @@
   <h2>Your Connections</h2>
 
   <h3>Connection List</h3>
+  
+  {% comment %} Show search and filters only when user has connections {% endcomment %}
+  {% if request.user.buddies.count > 0 %}
+    {% include "accounts/partials/buddy_search_filter.html" %}
+  {% endif %}
+  
   <div id="buddy-list-container">
     {% if buddy_list %}
       {% include "accounts/partials/buddy_list.html" %}
