@@ -141,9 +141,13 @@ def remove_buddy(request, pk):
         # RT: Returns an empty response for HTMX to delete the item
         return HttpResponse('')
     else:
-        # RT: If no buddies left, return the empty state with out-of-band swap for the container
+        # RT: If no buddies left, return the empty state and hide the search/filter UI with out-of-band swaps
         empty_state_html = render_to_string('accounts/partials/buddy_list_empty.html', request=request)
-        return HttpResponse(f'<div hx-swap-oob="innerHTML:#buddy-list-container">{empty_state_html}</div>')
+        response_html = f'''
+            <div hx-swap-oob="innerHTML:#buddy-list-container">{empty_state_html}</div>
+            <div hx-swap-oob="innerHTML:#buddy-search-filter-wrapper"></div>
+        '''
+        return HttpResponse(response_html)
 
 """
 Author: Evan
