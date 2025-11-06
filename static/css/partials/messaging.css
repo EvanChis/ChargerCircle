@@ -20,3 +20,40 @@
 
 .message-sender-name { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem; color: rgba(var(--u-accent-rgb) / 0.8); }
 .message.sent .message-sender-name { display: none; }
+
+/* Styles for Image Upload Button --- */
+
+.chat-form-container form {
+  display: flex;
+  gap: 0.5rem; /* Reduced gap slightly */
+  align-items: center;
+}
+
+/* Style the new paperclip button */
+#chat-image-button {
+  padding: 0.5rem;
+  min-width: 42px; /* Match height */
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--u-surface-container-high);
+  color: var(--u-on-surface-variant);
+}
+
+#chat-image-button:hover {
+  background-color: var(--u-surface-container-highest);
+  color: var(--u-on-surface);
+}
+
+/* Make the text input field take the remaining space */
+.chat-form-container #chat-form {
+  flex-grow: 1;
+}
+.chat-form-container .message-input {
+  flex: 1;
+}
+
+/* This form is just for HTMX, it shouldn't be visible */
+#image-upload-form {
+  display: none;
+}

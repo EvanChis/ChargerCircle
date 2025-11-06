@@ -78,7 +78,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 sender = await self.get_user_instance(sender_id)
                 thread = await self.get_thread_instance(self.thread_id)
                 
-                await self.create_message(thread, sender, message_content)
+                # MODIFICATION: Only save content if it's not None
+                if message_content:
+                    await self.create_message(thread, sender, message_content)
+                
+                # (The image was already saved by the 'upload_chat_image_view')
 
                 # After saving, broadcast the new message to the group
                 await self.channel_layer.group_send(
@@ -86,6 +90,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     {
                         'type': 'chat_message', 
                         'message': message_content, 
+                        'image_url': None,
                         'sender_id': sender_id,
                         'sender_first_name': sender_first_name
                     }
@@ -101,12 +106,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
     RT: This pushes a new chat message to the user's screen.
     """
     async def chat_message(self, event):
+        # This will now include 'image_url' if it exists.
         await self.send(text_data=json.dumps({
             'type': 'chat_message', 
-            'message': event['message'], 
+            'message': event.get('message'), 
+            'image_url': event.get('image_url'),
             'sender_id': event['sender_id'],
             'sender_first_name': event['sender_first_name']
         }))
+        # --- END MODIFICATION ---
 
     """
     This function is called when the broadcast system gets a

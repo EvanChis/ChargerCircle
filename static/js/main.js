@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     /*
-    Author: Evan
     This section sets up the main WebSocket connection used for general
     site notifications (like "You Matched!") and for receiving live
     updates about who comes online or goes offline.
@@ -347,7 +346,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     /*
-    Author: Oju
     This section manages the real-time chat functionality on the
     messaging page. It establishes a WebSocket connection specific
     to the currently open chat thread.
@@ -393,7 +391,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             typingIndicator.style.display = 'none';
                         }, 2000);
                     }
-                } else if (data.type === 'chat_message') {
+                } 
+                // Refactored by Angie for image handling
+                else if (data.type === 'chat_message') {
                     const isSent = data.sender_id == currentUserId; // Was this message sent by me?
                     const messageDiv = document.createElement('div');
                     // Apply 'sent' or 'received' class for styling
@@ -405,12 +405,32 @@ document.addEventListener('DOMContentLoaded', function () {
                         senderName = `<small class="message-sender-name">${data.sender_first_name}</small>`;
                     }
 
+                    // Build the message content. It might be text, an image, or both.
+                    let messageContentHTML = '';
+                    
+                    // Check for an image URL
+                    if (data.image_url) {
+                        // Add an image tag. You'll want to style .chat-image
+                        messageContentHTML += `<img src="${data.image_url}" class="chat-image" alt="User image" style="max-width: 100%; border-radius: 12px; margin-top: 5px;">`;
+                    }
+                    
+                    // Check for text content
+                    if (data.message) {
+                        messageContentHTML += `<p>${data.message}</p>`;
+                    }
+                    
                     // Add the sender name (if any) and the message content
-                    messageDiv.innerHTML = `${senderName}<p>${data.message}</p>`;
+                    messageDiv.innerHTML = `${senderName}${messageContentHTML}`;
+
                     messageList.appendChild(messageDiv); // Add the new bubble to the list
                     messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
                     typingIndicator.style.display = 'none'; // Hide typing indicator
+                    
+                    // Clear the file input after successful send
+                    const imageInput = document.getElementById('chat-image-input');
+                    if (imageInput) imageInput.value = null;
                 }
+                // --- END MODIFICATION ---
             };
 
             // Log error if chat connection closes unexpectedly.
@@ -579,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- START: Profile Gallery Modal (NEW VERSION) ---
     /*
-    Author: Evan (and Gemini)
+    Author: Evan
     This section handles the pop-up gallery modal on the
     user profile page.
     */

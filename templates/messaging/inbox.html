@@ -6,7 +6,10 @@
       the invite directly within the chat window, updating the message
       bubble without a page reload. The page also relies heavily on
       WebSockets for real-time chat messages, typing indicators, and
-      displaying the online status of buddies in the sidebar and chat header. {% endcomment %}
+      displaying the online status of buddies in the sidebar and chat header.
+      
+      MODIFICATION: Added HTMX form for image uploads.
+{% endcomment %}
       
 
 {% block content %}
@@ -66,18 +69,39 @@
               {% include "messaging/partials/invite_message.html" %}
             {% else %}
               <div id="message-{{ message.id }}">
-                <p>{{ message.content }}</p>
+                {# --- MODIFICATION: Check for image or text --- #}
+                {% if message.image %}
+                  <img src="{{ message.image.url }}" class="chat-image" alt="User image" style="max-width: 100%; border-radius: 12px; margin-top: 5px;">
+                {% endif %}
+                {% if message.content %}
+                  <p>{{ message.content }}</p>
+                {% endif %}
               </div>
             {% endif %}
           </div>
         {% endfor %}
       </div>
+      
+      {# --- MODIFICATION: Replaced this entire div --- #}
       <div class="chat-form-container">
+        <form id="image-upload-form"
+              hx-post="{% url 'upload_chat_image' thread_id=selected_thread.pk %}"
+              hx-encoding="multipart/form-data" 
+              hx-swap="none"
+              hx-trigger="change from:#chat-image-input">
+            {% csrf_token %}
+            <input type="file" name="image" id="chat-image-input" class="visually-hidden" accept="image/*">
+        </form>
+
         <form id="chat-form">
-          {{ form.content }}
-          <button type="submit" class="btn btn-primary">Send</button>
+            <button type="button" class="btn btn-secondary" id="chat-image-button" onclick="document.getElementById('chat-image-input').click();" title="Send image">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 20px; height: 20px;"><path fill-rule="evenodd" d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243L15.75 8.5a.75.75 0 0 1 1.5 0v.043a3.75 3.75 0 1 1-7.5 0V8.5a2.25 2.25 0 1 0 4.5 0V8.5a.75.75 0 0 1 1.5 0v.043a.75.75 0 0 0 1.5 0V8.5a3 3 0 0 0-3-3Z" clip-rule="evenodd" /></svg>
+            </button>
+            {{ form.content }}
+            <button type="submit" class="btn btn-primary">Send</button>
         </form>
       </div>
+      
     {% else %}
       <div class="no-chat-selected">
         <p>Select a conversation to start chatting.</p>
