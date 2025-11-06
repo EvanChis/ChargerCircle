@@ -3,7 +3,11 @@
 {% comment %} Author: Evan {% endcomment %}
 {% comment %} HTMX: This page does not contain specific HTMX functionality. It displays
       either the logged-in user's own profile or another user's public
-      profile information. {% endcomment %}
+      profile information. 
+      
+      MODIFICATION: Added a clickable modal gallery for profile images
+      that can be triggered by the main image or thumbnails.
+{% endcomment %}
 
 
 {% block content %}
@@ -11,9 +15,9 @@
 
   <div class="profile-header">
     {% if profile_user.profile.main_image_url %}
-      <img src="{{ profile_user.profile.main_image_url }}" alt="{{ profile_user.first_name }}'s profile picture" class="profile-main-image">
+      <img id="profile-image-trigger" src="{{ profile_user.profile.main_image_url }}" alt="{{ profile_user.first_name }}'s profile picture" class="profile-main-image" style="cursor: pointer;">
     {% else %}
-      <div class="profile-main-image-placeholder">
+      <div id="profile-image-trigger" class="profile-main-image-placeholder" style="cursor: pointer;">
         <span>{{ profile_user.first_name.0 }}</span>
       </div>
     {% endif %}
@@ -49,7 +53,11 @@
       <div class="image-gallery">
         {% for img in profile_images %}
           <div class="image-thumbnail-container">
-            <img src="{{ img.image.url }}" alt="Profile image {{ forloop.counter }}" class="profile-image-thumb {% if img.is_main %}is-main{% endif %}">
+            <img src="{{ img.image.url }}" 
+                 alt="Profile image {{ forloop.counter }}" 
+                 class="profile-image-thumb {% if img.is_main %}is-main{% endif %} profile-thumbnail-trigger" 
+                 data-gallery-index="{{ forloop.counter0 }}"
+                 style="cursor: pointer;">
           </div>
         {% endfor %}
       </div>
@@ -57,4 +65,44 @@
   {% endif %}
 
 </div>
+
+{# --- START: Profile Gallery Modal --- #}
+<div class="modal-backdrop" id="profile-gallery-modal" style="display: none;">
+  <button class="modal-close-btn" id="profile-gallery-close">&times;</button>
+  
+  <div class="modal-content">
+    <div class="profile-image-gallery" id="profile-gallery-{{ profile_user.pk }}" data-user-pk="{{ profile_user.pk }}">
+      
+      {% if profile_images %}
+        {% for image in profile_images %}
+          <img src="{{ image.image.url }}" 
+               alt="{{ profile_user.first_name }}'s profile image" 
+               class="profile-gallery-image {% if image.is_main %}active{% elif not image.is_main and forloop.first %}active{% endif %}"
+               data-gallery-index="{{ forloop.counter0 }}">
+        {% endfor %}
+      {% else %}
+        <div class="profile-image-placeholder">
+          <span>{{ profile_user.first_name.0 }}</span>
+        </div>
+      {% endif %}
+
+      {% if profile_images.count > 1 %}
+        <div class="gallery-controls show-btns">
+          <button class="gallery-control-btn left" data-gallery-user="{{ profile_user.pk }}" data-gallery-direction="-1">&#10094;</button>
+          <button class="gallery-control-btn right" data-gallery-user="{{ profile_user.pk }}" data-gallery-direction="1">&#10095;</button>
+        </div>
+        <div class="gallery-pagination">
+          {% for image in profile_images %}
+            <span class="pagination-dot {% if image.is_main %}active{% elif not image.is_main and forloop.first %}active{% endif %}" 
+                  data-gallery-user="{{ profile_user.pk }}" 
+                  data-gallery-index="{{ forloop.counter0 }}"></span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+    </div>
+  </div>
+
+</div>
+{# --- END: Profile Gallery Modal --- #}
 {% endblock content %}

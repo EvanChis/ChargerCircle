@@ -147,7 +147,7 @@ class Command(BaseCommand):
                 post_content = f"""
 <img src="{final_image_url}" alt="" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 1rem;">
 <p><strong>When:</strong> {event_date}</p>
-<a href="{event_url}" target="_blank" class="button" style="text-decoration: none; margin-bottom: 1rem; display: inline-block;">
+<a href="{event_url}" target="_blank" class="btn btn-primary" style="text-decoration: none; margin-bottom: 1rem; display: inline-block;">
     View Original Event
 </a>
 <hr>

@@ -575,6 +575,71 @@ document.addEventListener('DOMContentLoaded', function () {
             currentImageIndex[userPk] = 0;
         }
     });
+
+
+    // --- START: Profile Gallery Modal (NEW VERSION) ---
+    /*
+    Author: Evan (and Gemini)
+    This section handles the pop-up gallery modal on the
+    user profile page.
+    */
+    const profileImageTrigger = document.getElementById('profile-image-trigger');
+    const galleryThumbnails = document.querySelectorAll('.profile-thumbnail-trigger');
+    const galleryModal = document.getElementById('profile-gallery-modal');
+    const galleryCloseBtn = document.getElementById('profile-gallery-close');
+
+    if (galleryModal && galleryCloseBtn) {
+        const gallery = galleryModal.querySelector('.profile-image-gallery');
+        const userPk = gallery.dataset.userPk;
+
+        // Function to open the modal
+        const openModal = () => {
+            galleryModal.style.display = 'flex'; // Show the modal
+        }
+
+        // Function to close the modal
+        const closeModal = () => {
+            galleryModal.style.display = 'none'; // Hide the modal
+        }
+
+        // --- Event Listeners ---
+
+        // Listener for the MAIN profile image
+        if (profileImageTrigger) {
+            profileImageTrigger.addEventListener('click', () => {
+                // Find the main image in the modal, get its index
+                const mainImage = gallery.querySelector('.profile-gallery-image.active');
+                let mainIndex = 0;
+                if (mainImage) {
+                    mainIndex = parseInt(mainImage.dataset.imageIndex, 10);
+                }
+                changeImage(userPk, mainIndex); // Set gallery to that index
+                openModal(); // Open
+            });
+        }
+
+        // Listeners for ALL the thumbnails in the "Pictures" card
+        galleryThumbnails.forEach(thumb => {
+            thumb.addEventListener('click', (e) => {
+                // Get the index from the thumbnail that was clicked
+                const clickedIndex = parseInt(e.currentTarget.dataset.galleryIndex, 10);
+                changeImage(userPk, clickedIndex); // Set gallery to that index
+                openModal(); // Open
+            });
+        });
+
+        // Listeners for closing the modal
+        galleryCloseBtn.addEventListener('click', closeModal);
+        galleryModal.addEventListener('click', (e) => {
+            // Close modal if user clicks on the backdrop
+            if (e.target === galleryModal) {
+                closeModal();
+            }
+        });
+    }
+    // --- END: Profile Gallery Modal ---
+
+
 });
 
 /*
