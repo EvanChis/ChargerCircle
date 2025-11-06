@@ -132,8 +132,16 @@ def remove_buddy(request, pk):
     SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=buddy_to_remove)
     SkippedMatch.objects.get_or_create(from_user=buddy_to_remove, skipped_user=request.user)
     
-    # RT: Returns an empty response for HTMX to delete the item
-    return HttpResponse('')
+    # Check if user has any buddies left
+    buddy_list = request.user.buddies.all()
+    
+    if buddy_list.exists():
+        # RT: Returns an empty response for HTMX to delete the item
+        return HttpResponse('')
+    else:
+        # RT: If no buddies left, return the empty state with out-of-band swap for the container
+        empty_state_html = render_to_string('accounts/partials/buddy_list_empty.html', request=request)
+        return HttpResponse(f'<div hx-swap-oob="innerHTML:#buddy-list-container">{empty_state_html}</div>')
 
 """
 Author: Evan

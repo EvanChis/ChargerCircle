@@ -1,5 +1,5 @@
 {% comment %} Author: Oju {% endcomment %}
-{% comment %} HTMX: This partial file displays the user's buddy list. Each item has a "Remove" button that uses an HTMX POST request to remove the buddy from the list without a page reload. It also displays real-time online status dots. {% endcomment %}
+{% comment %} HTMX: This partial file displays the user's connection list. Each item has a "Remove" button that uses an HTMX POST request to remove the connection from the list without a page reload. It also displays real-time online status dots. {% endcomment %}
 
 <ul class="styled-list" id="buddy-list">
   {% for buddy in buddy_list %}
@@ -17,7 +17,7 @@
       <form hx-post="{% url 'remove_buddy' pk=buddy.pk %}" 
             hx-target="#buddy-{{ buddy.pk }}" 
             hx-swap="outerHTML" 
-            data-confirm="Are you sure you want to remove {{ buddy.first_name }} as a buddy?">
+            data-confirm="Are you sure you want to remove {{ buddy.first_name }} from your connections?">
         {% csrf_token %}
         <button type="submit" class="btn btn-secondary btn-sm btn-danger">Remove</button>
       </form>

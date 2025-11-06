@@ -36,12 +36,12 @@ class PostForm(forms.ModelForm):
 
 """
 Author: Angie
-This is a helper class to customize how buddies are displayed
+This is a helper class to customize how connections are displayed
 in the 'SessionCreateForm'. Instead of showing just their
 email or ID, it makes the form display their full first and
 last name, which is more user-friendly.
 """
-# Shows buddies by First Last
+# Shows connections by First Last
 class BuddyChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -50,17 +50,17 @@ class BuddyChoiceField(forms.ModelMultipleChoiceField):
 Author: Angie
 This class defines the form used for creating a new live study
 session. It includes fields to select the course, enter a topic,
-and optionally choose buddies to invite using checkboxes. The
-list of buddies to invite is customized to show full names and
+and optionally choose connections to invite using checkboxes. The
+list of connections to invite is customized to show full names and
 excludes the user creating the session.
 """
 class SessionCreateForm(forms.ModelForm):
-    # form to create a live session and optionally invite buddies
+    # form to create a live session and optionally invite connections
     buddies_to_invite = BuddyChoiceField(
-        queryset=None, # The actual list of buddies is set below
+        queryset=None, # The actual list of connections is set below
         widget=forms.CheckboxSelectMultiple, # Display as checkboxes
-        required=False, # Inviting buddies is optional
-        label="Invite Buddies"
+        required=False, # Inviting connections is optional
+        label="Invite Connections"
     )
 
     class Meta:

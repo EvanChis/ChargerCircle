@@ -1,23 +1,21 @@
 {% extends "base.html" %}
 
 {% comment %} Author: Evan and Oju {% endcomment %}
-{% comment %} HTMX: This page uses HTMX to allow users to remove a buddy or undo
+{% comment %} HTMX: This page uses HTMX to allow users to remove a connection or undo
       a recent skip/like action without reloading the page. The list
       updates instantly when these actions are performed. {% endcomment %}
 
 
 {% block content %}
 <div class="content-wrapper">
-  <h2>Your Buddies</h2>
+  <h2>Your Connections</h2>
 
-  <h3>Buddy List</h3>
+  <h3>Connection List</h3>
   <div id="buddy-list-container">
     {% if buddy_list %}
       {% include "accounts/partials/buddy_list.html" %}
     {% else %}
-      <div class="card">
-        <p>You don't have any buddies yet. Head over to the <a href="{% url 'discover' %}">Discover</a> page to find some!</p>
-      </div>
+      {% include "accounts/partials/buddy_list_empty.html" %}
     {% endif %}
   </div>
 
