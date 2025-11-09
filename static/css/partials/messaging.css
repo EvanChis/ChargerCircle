@@ -53,7 +53,7 @@
 }
 
 /* This form is just for HTMX, it shouldn't be visible */
-#image-upload-form {
+#messaging-image-upload-form {
   display: none;
 }
 
