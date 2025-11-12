@@ -13,3 +13,7 @@
 /* Nav Profile Picture */
 .nav-profile-pic { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(var(--u-ink-inv-rgb) / 0.2); vertical-align: middle; transition: transform 150ms ease; }
 .nav-profile-pic:hover { transform: scale(1.1); }
+
+/* Nav Profile Placeholder */
+.nav-profile-placeholder { display: flex; align-items: center; justify-content: center; background-color: var(--u-accent-color); color: white; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; }
+.nav-profile-placeholder span { line-height: 1; }
