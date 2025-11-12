@@ -20,7 +20,7 @@
     </div>
 
     <div class="form-group">
-      {{ form.buddies_to_invite.label_tag }}
+      <label for="{{ form.buddies_to_invite.id_for_label }}">Connections to Invite</label>
       <div class="buddy-select-pills">
         {% for choice in form.buddies_to_invite %}
           <div class="buddy-pill">

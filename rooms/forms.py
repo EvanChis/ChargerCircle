@@ -36,7 +36,7 @@ class PostForm(forms.ModelForm):
 
 """
 Author: Angie
-This is a helper class to customize how buddies are displayed
+This is a helper class to customize how connections are displayed
 in the 'SessionCreateForm'. Instead of showing just their
 email or ID, it makes the form display their full first and
 last name, which is more user-friendly.
@@ -50,8 +50,8 @@ class BuddyChoiceField(forms.ModelMultipleChoiceField):
 Author: Angie
 This class defines the form used for creating a new live study
 session. It includes fields to select the course, enter a topic,
-and optionally choose buddies to invite using checkboxes. The
-list of buddies to invite is customized to show full names and
+and optionally choose connections to invite using checkboxes. The
+list of connections to invite is customized to show full names and
 excludes the user creating the session.
 """
 class SessionCreateForm(forms.ModelForm):
