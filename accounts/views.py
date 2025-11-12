@@ -218,6 +218,10 @@ def buddies_view(request):
     from rooms.models import Course
     user_courses = Course.objects.filter(students=request.user).exclude(slug='hang-out')
     
+    # Get or create message threads for each buddy (simple approach)
+    for buddy in buddy_list:
+        buddy.message_thread = get_or_create_message_thread([request.user, buddy])
+    
     last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
 
     # Check if any filters are active

@@ -1,5 +1,58 @@
 /* Connections/Buddies Page Styles */
 
+/* Buddy List Item Layout */
+.styled-list .buddy-list-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem;
+}
+
+.styled-list .buddy-list-item .buddy-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Buddy List Actions */
+.styled-list .buddy-list-item .buddy-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.buddy-actions form {
+  margin: 0;
+  display: inline-block;
+}
+
+/* Make both buttons the same size and style */
+.buddy-actions .btn {
+  width: 100px !important;
+  padding: 0.5rem 0.75rem !important;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+
+.buddy-actions .btn-sm {
+  width: 100px !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+}
+
 /* Search and Filter Container */
 .buddy-search-filter-container {
   background-color: var(--card-bg-color);

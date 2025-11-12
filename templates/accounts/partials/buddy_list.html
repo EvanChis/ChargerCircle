@@ -14,13 +14,16 @@
         {% endif %}
         <a href="{% url 'profile' pk=buddy.pk %}" class="user-name"> {{ buddy.first_name }} {{ buddy.last_name }}<span class="online-indicator"></span></a>
       </div>
-      <form hx-post="{% url 'remove_buddy' pk=buddy.pk %}" 
-            hx-target="#buddy-{{ buddy.pk }}" 
-            hx-swap="outerHTML" 
-            data-confirm="Are you sure you want to remove {{ buddy.first_name }} from your connections?">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-secondary btn-sm btn-danger">Remove</button>
-      </form>
+      <div class="buddy-actions">
+        <a href="{% url 'conversation' thread_id=buddy.message_thread.pk %}" class="btn btn-primary btn-sm">Message</a>
+        <form hx-post="{% url 'remove_buddy' pk=buddy.pk %}" 
+              hx-target="#buddy-{{ buddy.pk }}" 
+              hx-swap="outerHTML" 
+              data-confirm="Are you sure you want to remove {{ buddy.first_name }} from your connections?">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary btn-sm btn-danger">Remove</button>
+        </form>
+      </div>
     </li>
   {% endfor %}
 </ul>
