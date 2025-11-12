@@ -2,8 +2,8 @@
 
 # Import forms from django because this file defines web forms.
 from django import forms # helper to make HTML forms and validate input
-# Import Thread, Post, Session from .models because the forms are based on these database tables.
-from .models import Thread, Post, Session # our database tables
+# Import Course
+from .models import Thread, Post, Session, Course # our database tables
 
 """
 Author: Angie
@@ -41,7 +41,7 @@ in the 'SessionCreateForm'. Instead of showing just their
 email or ID, it makes the form display their full first and
 last name, which is more user-friendly.
 """
-# Shows buddies by First Last
+# Shows friends by First Last
 class BuddyChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -55,19 +55,24 @@ list of buddies to invite is customized to show full names and
 excludes the user creating the session.
 """
 class SessionCreateForm(forms.ModelForm):
-    # form to create a live session and optionally invite buddies
+    # form to create a live session and optionally invite friends
     buddies_to_invite = BuddyChoiceField(
-        queryset=None, # The actual list of buddies is set below
+        queryset=None, # The actual list of friends is set below
         widget=forms.CheckboxSelectMultiple, # Display as checkboxes
-        required=False, # Inviting buddies is optional
-        label="Invite Buddies"
+        
+        # Make friend invites required
+        required=True,
+        label="Invite Friends (Must select at least one)",
+        error_messages={
+            'required': 'You must invite at least one friend to create a session.'
+        }
     )
 
     class Meta:
         model = Session
         fields = ['course', 'topic', 'buddies_to_invite']
 
-    # This special method runs when the form is created
+    # This method runs when the form is created
     def __init__(self, *args, **kwargs):
         # Get the user who is creating the session (passed in from the view)
         user = kwargs.pop('user', None)
@@ -77,3 +82,5 @@ class SessionCreateForm(forms.ModelForm):
             # excluding themselves from the list.
             self.fields['buddies_to_invite'].queryset = user.buddies.exclude(pk=user.pk)
 
+        # Show ALL tags (Courses, Interests, Hidden) in the dropdown
+        self.fields['course'].queryset = Course.objects.all().order_by('name')

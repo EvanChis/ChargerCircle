@@ -21,13 +21,18 @@ class SessionAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         return []
 
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'tag_type') # Add 'tag_type'
+    list_filter = ('tag_type',) # Add a filter
+    search_fields = ('name', 'slug')
+
 """
 Author: Angie
 This block of code makes the main database tables for the
 'rooms' app (Course, Thread, Post, Session) visible and
 editable within the Django admin control panel.
 """
-admin.site.register(Course)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(Thread)
 admin.site.register(Post)
-admin.site.register(Session, SessionAdmin) # Uses the custom admin display defined above
+admin.site.register(Session, SessionAdmin)
