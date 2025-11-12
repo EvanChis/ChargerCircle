@@ -29,9 +29,9 @@
     {% if user.is_authenticated %}
     <header class="main-header">
         <nav class="main-nav">
-            <a href="{% url 'discover' %}" class="nav-brand">Charger Circle</a>
+            <a href="{% url 'dashboard' %}" class="nav-brand">Charger Circle</a>
             <ul>
-                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'discover' %}">Discover</a></li>
                 <li><a href="{% url 'buddies' %}">Connections</a></li>
                 <li><a href="{% url 'sessions' %}">Sessions</a></li>
                 <li><a href="{% url 'course_list' %}">Rooms</a></li>
