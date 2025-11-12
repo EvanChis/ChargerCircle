@@ -8,11 +8,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 # Import login_required from django.contrib.auth.decorators because 'inbox_view' needs it.
 from django.contrib.auth.decorators import login_required
 # Import MessageThread from .models because 'inbox_view' needs it to fetch chat threads and messages.
-from .models import MessageThread
+from .models import MessageThread, Message
 # Import MessageForm from .forms because 'inbox_view' needs it to display the message input form.
 from .forms import MessageForm
 # Import get_online_user_ids from core.utils because 'inbox_view' needs it to show online status.
 from core.utils import get_online_user_ids
+# --- NEW IMPORTS ---
+from django.http import HttpResponse, HttpResponseForbidden
+from django.views.decorators.http import require_POST
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+# --- END NEW IMPORTS ---
 
 """
 Author: Cole (Original Logic) / Oju (RT Refactor)
@@ -65,3 +71,43 @@ def inbox_view(request, thread_id=None):
     }
     # Render the inbox HTML page with all the prepared data
     return render(request, 'messaging/inbox.html', context)
+
+
+# Author: Angie
+# View for image messages
+@login_required
+@require_POST
+def upload_chat_image_view(request, thread_id):
+    thread = get_object_or_404(MessageThread, pk=thread_id)
+    if request.user not in thread.participants.all():
+        return HttpResponseForbidden()
+
+    if 'image' in request.FILES:
+        image = request.FILES['image']
+        
+        # Create the new message object with the image
+        new_message = Message.objects.create(
+            thread=thread,
+            sender=request.user,
+            image=image
+        )
+        new_message.save() # Save to get the image URL
+
+        # --- Real-Time Broadcast ---
+        channel_layer = get_channel_layer()
+        room_group_name = f'chat_{thread.id}'
+        
+        broadcast_data = {
+            'type': 'chat_message', # Use the same type as text messages
+            'message': None, # No text content
+            'image_url': new_message.image.url, # Send the new image URL
+            'sender_id': request.user.id,
+            'sender_first_name': request.user.first_name,
+        }
+        
+        async_to_sync(channel_layer.group_send)(room_group_name, broadcast_data)
+        
+        # Return a "No Content" response to tell HTMX the upload was successful
+        return HttpResponse(status=204)
+    
+    return HttpResponse("No image provided.", status=400)

@@ -5,8 +5,6 @@
       either the logged-in user's own profile or another user's public
       profile information. 
       
-      MODIFICATION: Added a clickable modal gallery for profile images
-      that can be triggered by the main image or thumbnails.
 {% endcomment %}
 
 
@@ -39,9 +37,10 @@
 
   {% if profile_user.courses.all %}
     <div class="course-tags">
-      {% for course in profile_user.courses.all %}
-        {% if course.slug != 'hang-out' %}
-          <span class="course-tag">{{ course.name }}</span>
+      {# MODIFIED: Loop and check tag_type to exclude hidden tags #}
+      {% for tag in profile_user.courses.all %}
+        {% if tag.tag_type == 'course' or tag.tag_type == 'interest' %}
+          <span class="course-tag">{{ tag.name }}</span>
         {% endif %}
       {% endfor %}
     </div>
@@ -66,7 +65,7 @@
 
 </div>
 
-{# --- START: Profile Gallery Modal --- #}
+{# Profile Gallery Modal #}
 <div class="modal-backdrop" id="profile-gallery-modal" style="display: none;">
   <button class="modal-close-btn" id="profile-gallery-close">&times;</button>
   
@@ -104,5 +103,4 @@
   </div>
 
 </div>
-{# --- END: Profile Gallery Modal --- #}
 {% endblock content %}

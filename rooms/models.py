@@ -14,9 +14,22 @@ and for organizing discussion rooms and study sessions. The
 """
 # Course/Rooms/Activities/Events Model
 class Course(models.Model):
+    
+    TAG_TYPE_CHOICES = [
+        ('course', 'Course'),
+        ('interest', 'Interest'),
+        ('hidden', 'Hidden'),
+    ]
+
     name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True) # URL-friendly identifier
+    slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
+
+    tag_type = models.CharField(
+        max_length=10,
+        choices=TAG_TYPE_CHOICES,
+        default='course'
+    )
 
     def __str__(self):
         return self.name
@@ -71,4 +84,3 @@ class Session(models.Model):
 
     def __str__(self):
         return f"'{self.topic}' for {self.course.name}"
-    

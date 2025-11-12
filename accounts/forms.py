@@ -5,7 +5,9 @@ from django import forms
 # Import UserCreationForm from django.contrib.auth.forms because 'CustomUserCreationForm' is based on it.
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 # Import models from .models because 'User', 'ProfileImage', and 'Course' are needed for the forms.
-from .models import User, ProfileImage, Course
+from .models import User, ProfileImage
+# Import Course from rooms to filter by tag_type
+from rooms.models import Course
 
 """
 Author: Evan
@@ -45,11 +47,22 @@ class ProfileUpdateForm(forms.ModelForm):
         widget=forms.Textarea(attrs={'rows': 4}), 
         required=False
     )
-    courses = forms.ModelMultipleChoiceField(
-        queryset=Course.objects.exclude(slug='hang-out'),
+    
+    interests = forms.ModelMultipleChoiceField(
+        queryset=Course.objects.filter(tag_type='interest').order_by('name'),
         widget=forms.CheckboxSelectMultiple,
-        required=False
+        required=False,
+        label='Interests'
     )
+
+    courses = forms.ModelMultipleChoiceField(
+        # Now filters by tag_type instead of excluding by slug
+        queryset=Course.objects.filter(tag_type='course').order_by('name'),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label='Courses'
+    )
+
 
     class Meta:
         model = User

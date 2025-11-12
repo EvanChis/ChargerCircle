@@ -35,7 +35,10 @@ messages also use this model.
 class Message(models.Model):
     thread = models.ForeignKey(MessageThread, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    content = models.TextField()
+    # MODIFICATION: Allow content to be blank (for image-only messages)
+    content = models.TextField(blank=True)
+    # Angie: Added an image field
+    image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

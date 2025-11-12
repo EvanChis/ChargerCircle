@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /*
-    Author: Evan
+    Author: Evan and Oju
     This function goes through *all* the online indicators currently
     visible on the page and makes sure they reflect the latest online
     status stored in the 'onlineUsers' set. This is useful after
@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     /*
-    Author: Evan
     This section sets up the main WebSocket connection used for general
     site notifications (like "You Matched!") and for receiving live
     updates about who comes online or goes offline.
@@ -366,12 +365,188 @@ document.addEventListener('DOMContentLoaded', function () {
             const chatForm = document.getElementById('chat-form');
             const messageInput = document.querySelector('.message-input');
             const typingIndicator = document.getElementById('typing-indicator');
+            const callButton = document.getElementById('voice-call-button');
+            const hangUpButton = document.getElementById('hang-up-button');
+
+            // --- WebRTC Variables ---
+            let peerConnection;
+            let localStream;
+            let remoteStream;
+            const localAudio = document.getElementById('local-audio');
+            const remoteAudio = document.getElementById('remote-audio');
+            
+            // This is a free, public STUN server from Google
+            const stunConfig = {
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            };
+            // --- END: WebRTC Variables ---
 
             // RT: Connect to the specific chat thread's WebSocket endpoint.
             const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + threadId + '/');
 
+            // --- NEW: Call UI Toggle Function ---
+            const setInCallUI = (inCall) => {
+                if (inCall) {
+                    callButton.style.display = 'none';
+                    hangUpButton.style.display = 'inline-block';
+                } else {
+                    callButton.style.display = 'inline-block';
+                    hangUpButton.style.display = 'none';
+                }
+            };
+            // --- END: Call UI Toggle Function ---
+
+            // --- WebRTC `startCall` Function ---
+            const startCall = async () => {
+                console.log('Starting call...');
+                setInCallUI(true); // Show hang up button
+                
+                try {
+                    // 1. Get microphone permissions
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    localAudio.srcObject = localStream; // Play local audio (muted)
+                    
+                    // 2. Create the Peer Connection
+                    peerConnection = new RTCPeerConnection(stunConfig);
+                    
+                    // --- Add ICE and Track listeners ---
+                    peerConnection.onicecandidate = handleICECandidate;
+                    peerConnection.ontrack = handleTrack;
+                    
+                    // 3. Add local audio tracks to the connection
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+
+                    // 4. Create an "offer"
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    
+                    console.log('Offer created. Sending call offer...');
+
+                    // 5. Send the "offer" signal to the other user
+                    chatSocket.send(JSON.stringify({
+                        'type': 'webrtc_offer',
+                        'sender_id': currentUserId,
+                        'sender_first_name': currentUserName,
+                        'offer_sdp': offer
+                    }));
+
+                } catch (error) {
+                    console.error('Error starting call:', error);
+                    alert('Could not start call. Please ensure you have a microphone and have given permission.');
+                    setInCallUI(false); // Revert UI on error
+                }
+            };
+            // --- END: WebRTC `startCall` Function ---
+            
+            // --- WebRTC `createAnswer` Function ---
+            const createAnswer = async (offer_sdp) => {
+                console.log('Creating answer...');
+                setInCallUI(true); // Show hang up button
+                
+                try {
+                    // 1. Get microphone permissions
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    localAudio.srcObject = localStream;
+                    
+                    // 2. Create the Peer Connection
+                    peerConnection = new RTCPeerConnection(stunConfig);
+                    
+                    // --- Add ice and Track listeners ---
+                    peerConnection.onicecandidate = handleICECandidate;
+                    peerConnection.ontrack = handleTrack;
+                    
+                    // 3. Add local audio tracks
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
+                    });
+
+                    // 4. Set the "offer" as the remote description
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer_sdp));
+                    
+                    // 5. Create an "answer"
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+
+                    console.log('Answer created. Sending answer...');
+                    
+                    // 6. Send the "answer" signal back to the caller
+                    chatSocket.send(JSON.stringify({
+                        'type': 'webrtc_answer',
+                        'sender_id': currentUserId,
+                        'answer_sdp': answer
+                    }));
+
+                } catch (error) {
+                    console.error('Error creating answer:', error);
+                    setInCallUI(false); // Revert UI on error
+                }
+            };
+            // --- END: WebRTC `createAnswer` Function ---
+            
+            // --- WebRTC `hangUp` and `closeCall` Functions ---
+            const hangUp = () => {
+                console.log('Hanging up call...');
+                
+                // Send hangup signal
+                chatSocket.send(JSON.stringify({
+                    'type': 'webrtc_hangup',
+                    'sender_id': currentUserId
+                }));
+                
+                // Clean up the connection locally
+                closeCall();
+            };
+            
+            const closeCall = () => {
+                console.log('Closing call connections.');
+                // Revert UI
+                setInCallUI(false);
+                
+                if (peerConnection) {
+                    peerConnection.onicecandidate = null;
+                    peerConnection.ontrack = null;
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                    localAudio.srcObject = null;
+                }
+                if (remoteStream) {
+                    remoteStream.getTracks().forEach(track => track.stop());
+                    remoteStream = null;
+                    remoteAudio.srcObject = null;
+                }
+            };
+            // --- END: WebRTC `hangUp` and `closeCall` Functions ---
+            
+            // --- WebRTC Helper Functions ---
+            const handleICECandidate = (event) => {
+                if (event.candidate) {
+                    console.log('Found ICE candidate. Sending...');
+                    // Send the candidate to the other user
+                    chatSocket.send(JSON.stringify({
+                        'type': 'webrtc_ice_candidate',
+                        'sender_id': currentUserId,
+                        'candidate': event.candidate
+                    }));
+                }
+            };
+            
+            const handleTrack = (event) => {
+                console.log('Received remote audio track!');
+                // A new track has been added by the remote peer
+                remoteStream = event.streams[0];
+                remoteAudio.srcObject = remoteStream;
+            };
+
+
             /*
             Author: Cole (Original Logic) / Oju (RT Refactor)
+            / Refactored by Angie for image handling / Evan for voice
             This function runs when a message is received from the chat WebSocket.
             - If it's a 'typing' indicator from someone else, it briefly shows
               the "... is typing" message.
@@ -393,8 +568,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             typingIndicator.style.display = 'none';
                         }, 2000);
                     }
-                } else if (data.type === 'chat_message') {
-                    const isSent = data.sender_id == currentUserId; // Was this message sent by me?
+                }
+
+                else if (data.type === 'chat_message') {
+                    const isSent = data.sender_id == currentUserId;
                     const messageDiv = document.createElement('div');
                     // Apply 'sent' or 'received' class for styling
                     messageDiv.className = 'message ' + (isSent ? 'sent' : 'received');
@@ -405,11 +582,84 @@ document.addEventListener('DOMContentLoaded', function () {
                         senderName = `<small class="message-sender-name">${data.sender_first_name}</small>`;
                     }
 
+                    // Build the message content. It might be text, an image, or both.
+                    let messageContentHTML = '';
+                    
+                    // Check for an image URL
+                    if (data.image_url) {
+                        // Add an image tag.
+                        messageContentHTML += `<img src="${data.image_url}" class="chat-image" alt="User image" style="max-width: 100%; border-radius: 12px; margin-top: 5px;">`;
+                    }
+                    
+                    // Check for text content
+                    if (data.message) {
+                        messageContentHTML += `<p>${data.message}</p>`;
+                    }
+                    
                     // Add the sender name (if any) and the message content
-                    messageDiv.innerHTML = `${senderName}<p>${data.message}</p>`;
-                    messageList.appendChild(messageDiv); // Add the new bubble to the list
-                    messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
-                    typingIndicator.style.display = 'none'; // Hide typing indicator
+                    messageDiv.innerHTML = `${senderName}${messageContentHTML}`;
+
+                    messageList.appendChild(messageDiv);
+                    messageList.scrollTop = messageList.scrollHeight;
+                    typingIndicator.style.display = 'none';
+                    
+                    // Clear the file input after successful send
+                    const imageInput = document.getElementById('chat-image-input');
+                    if (imageInput) imageInput.value = null;
+                }
+
+                else if (data.type === 'webrtc_offer') {
+                    // This is an incoming call offer
+                    if (data.sender_id != currentUserId) {
+                        // Use the custom confirm dialog
+                        showConfirm(`Incoming call from ${data.sender_first_name}!`,
+                            () => {
+                                // User clicked "OK" (Accept)
+                                // Create an answer
+                                createAnswer(data.offer_sdp);
+                            },
+                            () => {
+                                // User clicked "Cancel" (Decline)
+                                console.log('Call declined.');
+                                // Send a hangup signal back
+                                chatSocket.send(JSON.stringify({
+                                    'type': 'webrtc_hangup',
+                                    'sender_id': currentUserId
+                                }));
+                            }
+                        );
+                    }
+                }
+                
+                // Handle receiving the answer
+                else if (data.type === 'webrtc_answer') {
+                    // This is an answer to our call
+                    if (data.sender_id != currentUserId) {
+                        console.log('Call answer received. Setting remote description...');
+                        // Set the "answer" as the remote description
+                        if (peerConnection) {
+                            peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer_sdp));
+                        }
+                    }
+                }
+                
+                else if (data.type === 'webrtc_ice_candidate') {
+                    // This is a network candidate from the other user
+                    if (data.sender_id != currentUserId) {
+                        console.log('Received ICE candidate. Adding...');
+                        if (peerConnection) {
+                            // Add the candidate to our peer connection
+                            peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        }
+                    }
+                }
+                
+                // Handle hangup
+                else if (data.type === 'webrtc_hangup') {
+                    if (data.sender_id != currentUserId) {
+                        console.log('Received hangup signal.');
+                        closeCall();
+                    }
                 }
             };
 
@@ -431,9 +681,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (chatForm) {
                 // Handle sending a message
                 chatForm.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Prevent normal form submission
+                    e.preventDefault();
                     const message = messageInput.value;
-                    if (message.trim() !== '') { // Only send if message isn't empty
+                    if (message.trim() !== '') {
                         // RT: Send message data over WebSocket.
                         chatSocket.send(JSON.stringify({
                             'type': 'chat_message',
@@ -447,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Handle typing indicator
                 messageInput.addEventListener('keyup', function(e) {
-                    if (e.key !== 'Enter') { // Don't send typing indicator on Enter key
+                    if (e.key !== 'Enter') {
                         // RT: Send typing status over WebSocket.
                         chatSocket.send(JSON.stringify({
                             'type': 'typing',
@@ -460,6 +710,13 @@ document.addEventListener('DOMContentLoaded', function () {
             // Scroll to the bottom of the message list when the page loads
             if (messageList) {
                 messageList.scrollTop = messageList.scrollHeight;
+            }
+
+            if (callButton) {
+                callButton.addEventListener('click', startCall);
+            }
+            if (hangUpButton) {
+                hangUpButton.addEventListener('click', hangUp);
             }
         }
     }
@@ -493,9 +750,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 // RT: Insert new thread HTML at the beginning of the list.
                 threadList.insertAdjacentHTML('afterbegin', data.html);
             } else if (data.message_type === 'new_post') {
-                const postList = document.getElementById('post-list'); // This is on the thread detail page
+                const postList = document.getElementById('post-list');
                 if(postList){
-                    // RT: Insert new post HTML at the end of the list.
+                    // RT: Insert new post HTML at theend of the list.
                     postList.insertAdjacentHTML('beforeend', data.html);
                 }
             }
@@ -579,7 +836,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- START: Profile Gallery Modal (NEW VERSION) ---
     /*
-    Author: Evan (and Gemini)
+    Author: Evan
     This section handles the pop-up gallery modal on the
     user profile page.
     */

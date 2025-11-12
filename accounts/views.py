@@ -276,8 +276,9 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             try:
-                hangout_course = Course.objects.get(slug='hang-out')
-                user.courses.add(hangout_course)
+                # Get ALL hidden tags
+                hidden_tags = Course.objects.filter(tag_type='hidden')
+                user.courses.add(*hidden_tags)
             except Course.DoesNotExist:
                 pass
             login(request, user)
@@ -384,7 +385,9 @@ def get_profile_editor_context(request):
     profile_images = profile.images.order_by('-is_main', '-uploaded_at')
     update_form = ProfileUpdateForm(instance=request.user, initial={
         'bio': profile.bio,
-        'courses': request.user.courses.all(),
+        # Pass both interests and courses to the form initial data
+        'interests': request.user.courses.filter(tag_type='interest'),
+        'courses': request.user.courses.filter(tag_type='course'),
     })
     return {'image_form': image_form, 'update_form': update_form, 'profile_images': profile_images}
 
@@ -423,7 +426,15 @@ def edit_profile_view(request):
                 profile.bio = update_form.cleaned_data['bio']
                 profile.save()
                 
-                user.courses.set(update_form.cleaned_data['courses'])
+                # Get all tag sets
+                interests = update_form.cleaned_data['interests']
+                courses = update_form.cleaned_data['courses']
+                # We must preserve existing hidden tags (like hang-out)
+                hidden_tags = user.courses.filter(tag_type='hidden')
+                
+                # Set the user's courses to the combination of all three
+                user.courses.set(interests | courses | hidden_tags)
+                
             return redirect('edit_profile')
     
     context = get_profile_editor_context(request)

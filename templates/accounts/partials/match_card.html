@@ -34,10 +34,12 @@
   
   <div class="profile-info">
     <h2>{{ match.user.first_name }} {{ match.user.last_name }}, {{ match.user.age }}</h2>
-    {% if match.shared_courses %}
+    
+    {# Use 'shared_tags' from find_matches service #}
+    {% if match.shared_tags %}
       <div class="course-tags">
-          {% for course in match.shared_courses %}
-              <span class="course-tag">{{ course.name }}</span>
+          {% for tag in match.shared_tags %}
+              <span class="course-tag">{{ tag.name }}</span>
           {% endfor %}
       </div>
     {% endif %}
