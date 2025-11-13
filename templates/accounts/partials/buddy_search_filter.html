@@ -1,0 +1,76 @@
+
+{% comment %} HTMX: This partial provides search and filter controls for the connections list. 
+      Uses HTMX to update the buddy list instantly when filters are changed without page reload. {% endcomment %}
+
+<div class="buddy-search-filter-container">
+  <form hx-get="{% url 'buddies' %}" 
+        hx-target="#buddy-list-container" 
+        hx-trigger="change, input delay:300ms from:find input[name='search']"
+        hx-indicator="#filter-loading"
+        class="buddy-filter-form">
+    
+    <!-- Search Bar -->
+    <div class="search-bar-group">
+      <input 
+        type="text" 
+        name="search" 
+        placeholder="Search by name..." 
+        value="{{ search_query }}"
+        class="search-input"
+      />
+    </div>
+
+    <!-- Filters Row -->
+    <div class="filters-row">
+      <!-- Online Status Filter -->
+      <div class="filter-group">
+        <label for="online-filter">Status:</label>
+        <select name="online" id="online-filter" class="filter-select">
+          <option value="" {% if not online_filter %}selected{% endif %}>All</option>
+          <option value="online" {% if online_filter == 'online' %}selected{% endif %}>Online</option>
+          <option value="offline" {% if online_filter == 'offline' %}selected{% endif %}>Offline</option>
+        </select>
+      </div>
+
+      <!-- Course Filter -->
+      {% if user_courses %}
+      <div class="filter-group">
+        <label for="course-filter">Course:</label>
+        <select name="course" id="course-filter" class="filter-select">
+          <option value="" {% if not course_filter %}selected{% endif %}>All Courses</option>
+          {% for course in user_courses %}
+            <option value="{{ course.slug }}" {% if course_filter == course.slug %}selected{% endif %}>
+              {{ course.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <!-- Sort Filter -->
+      <div class="filter-group">
+        <label for="sort-filter">Sort:</label>
+        <select name="sort" id="sort-filter" class="filter-select">
+          <option value="" {% if not sort_by %}selected{% endif %}>Default</option>
+          <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+          <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+        </select>
+      </div>
+
+      <!-- Reset Button -->
+      <button 
+        type="button" 
+        class="btn btn-secondary btn-sm reset-filters-btn"
+        onclick="document.querySelector('.buddy-filter-form').reset(); htmx.trigger('.buddy-filter-form', 'change');"
+      >
+        Reset
+      </button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="filter-loading" class="htmx-indicator filter-loading">
+      <span>Filtering...</span>
+    </div>
+  </form>
+</div>
+

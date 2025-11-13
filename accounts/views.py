@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 # Import HttpResponse from django.http because 'remove_buddy', 'undo_action_view' need it.
 from django.http import HttpResponse
+# Import models from django.db because 'buddies_view' needs Q for complex queries.
+from django.db import models
 # Import require_POST from django.views.decorators.http because several views need it.
 from django.views.decorators.http import require_POST
 # Import async_to_sync from asgiref.sync because 'check_for_match' needs it.
@@ -132,8 +134,20 @@ def remove_buddy(request, pk):
     SkippedMatch.objects.get_or_create(from_user=request.user, skipped_user=buddy_to_remove)
     SkippedMatch.objects.get_or_create(from_user=buddy_to_remove, skipped_user=request.user)
     
-    # RT: Returns an empty response for HTMX to delete the item
-    return HttpResponse('')
+    # Check if user has any buddies left
+    buddy_list = request.user.buddies.all()
+    
+    if buddy_list.exists():
+        # RT: Returns an empty response for HTMX to delete the item
+        return HttpResponse('')
+    else:
+        # RT: If no buddies left, return the empty state and hide the search/filter UI with out-of-band swaps
+        empty_state_html = render_to_string('accounts/partials/buddy_list_empty.html', request=request)
+        response_html = f'''
+            <div hx-swap-oob="innerHTML:#buddy-list-container">{empty_state_html}</div>
+            <div hx-swap-oob="innerHTML:#buddy-search-filter-wrapper"></div>
+        '''
+        return HttpResponse(response_html)
 
 """
 Author: Evan
@@ -169,15 +183,75 @@ green "online" dots next to buddies.
 @login_required
 def buddies_view(request):
     buddy_list = request.user.buddies.all()
+    
+    # Get filter and search parameters
+    search_query = request.GET.get('search', '').strip()
+    online_filter = request.GET.get('online', '')
+    course_filter = request.GET.get('course', '')
+    sort_by = request.GET.get('sort', '')
+    
+    # Apply search filter (by name)
+    if search_query:
+        buddy_list = buddy_list.filter(
+            models.Q(first_name__icontains=search_query) |
+            models.Q(last_name__icontains=search_query)
+        )
+    
+    # Apply online status filter
     online_user_ids = get_online_user_ids() # RT: Fetches live presence data
+    if online_filter == 'online':
+        buddy_list = buddy_list.filter(pk__in=online_user_ids)
+    elif online_filter == 'offline':
+        buddy_list = buddy_list.exclude(pk__in=online_user_ids)
+    
+    # Apply course filter
+    if course_filter:
+        buddy_list = buddy_list.filter(courses__slug=course_filter)
+    
+    # Apply sorting
+    if sort_by == 'name_asc':
+        buddy_list = buddy_list.order_by('first_name', 'last_name')
+    elif sort_by == 'name_desc':
+        buddy_list = buddy_list.order_by('-first_name', '-last_name')
+    
+    # Get user's courses for filter dropdown
+    from rooms.models import Course
+    user_courses = Course.objects.filter(students=request.user).exclude(slug='hang-out')
+    
+    # Get or create message threads for each buddy (simple approach)
+    for buddy in buddy_list:
+        buddy.message_thread = get_or_create_message_thread([request.user, buddy])
+    
     last_skipped = SkippedMatch.objects.filter(from_user=request.user)[:10]
 
+    # Check if any filters are active
+    has_filters = bool(search_query or online_filter or course_filter or sort_by)
+    
     context = {
         'buddy_list': buddy_list,
         'online_user_ids': online_user_ids,
         'last_skipped': last_skipped,
         'online_user_ids_json': json.dumps(list(online_user_ids)), # RT: Passes live data to the page
+        'user_courses': user_courses,
+        'search_query': search_query,
+        'online_filter': online_filter,
+        'course_filter': course_filter,
+        'sort_by': sort_by,
+        'has_filters': has_filters,
     }
+    
+    # If this is an HTMX request, return only the buddy list partial
+    if request.headers.get('HX-Request'):
+        if buddy_list:
+            return render(request, 'accounts/partials/buddy_list.html', context)
+        else:
+            # If filters are active but no results, show "no results" message
+            # Otherwise show the empty state
+            if has_filters:
+                return render(request, 'accounts/partials/buddy_list_no_results.html', context)
+            else:
+                return render(request, 'accounts/partials/buddy_list_empty.html', context)
+    
     return render(request, 'accounts/buddies.html', context)
 
 
@@ -202,8 +276,9 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             try:
-                hangout_course = Course.objects.get(slug='hang-out')
-                user.courses.add(hangout_course)
+                # Get ALL hidden tags
+                hidden_tags = Course.objects.filter(tag_type='hidden')
+                user.courses.add(*hidden_tags)
             except Course.DoesNotExist:
                 pass
             login(request, user)
@@ -310,7 +385,9 @@ def get_profile_editor_context(request):
     profile_images = profile.images.order_by('-is_main', '-uploaded_at')
     update_form = ProfileUpdateForm(instance=request.user, initial={
         'bio': profile.bio,
-        'courses': request.user.courses.all(),
+        # Pass both interests and courses to the form initial data
+        'interests': request.user.courses.filter(tag_type='interest'),
+        'courses': request.user.courses.filter(tag_type='course'),
     })
     return {'image_form': image_form, 'update_form': update_form, 'profile_images': profile_images}
 
@@ -349,7 +426,15 @@ def edit_profile_view(request):
                 profile.bio = update_form.cleaned_data['bio']
                 profile.save()
                 
-                user.courses.set(update_form.cleaned_data['courses'])
+                # Get all tag sets
+                interests = update_form.cleaned_data['interests']
+                courses = update_form.cleaned_data['courses']
+                # We must preserve existing hidden tags (like hang-out)
+                hidden_tags = user.courses.filter(tag_type='hidden')
+                
+                # Set the user's courses to the combination of all three
+                user.courses.set(interests | courses | hidden_tags)
+                
             return redirect('edit_profile')
     
     context = get_profile_editor_context(request)
