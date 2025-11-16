@@ -488,15 +488,19 @@ document.addEventListener('DOMContentLoaded', function () {
             // --- WebRTC `hangUp` and `closeCall` Functions ---
             const hangUp = () => {
                 console.log('Hanging up call...');
-                
-                // Send hangup signal
-                chatSocket.send(JSON.stringify({
-                    'type': 'webrtc_hangup',
-                    'sender_id': currentUserId
-                }));
-                
-                // Clean up the connection locally
-                closeCall();
+    
+                try {
+                    // Try to send the hangup signal
+                    chatSocket.send(JSON.stringify({
+                        'type': 'webrtc_hangup',
+                        'sender_id': currentUserId
+                    }));
+                } catch (error) {
+                    console.warn('Could not send hangup signal, socket likely closed:', error);
+                } finally {
+                    // ALWAYS clean up the connection locally, even if send fails
+                    closeCall();
+                }
             };
             
             const closeCall = () => {
@@ -560,10 +564,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const data = JSON.parse(e.data);
 
                 if (data.type === 'typing') {
-                    // Only show typing indicator if it's from someone else
                     if (data.sender_id != currentUserId) {
-                        typingIndicator.style.display = 'block'; // Show "... is typing"
-                        // Hide it again after 2 seconds
+                        typingIndicator.textContent = `${data.sender_first_name} is typing...`;
+                        typingIndicator.style.display = 'block';
+
                         setTimeout(() => {
                             typingIndicator.style.display = 'none';
                         }, 2000);
