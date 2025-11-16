@@ -20,7 +20,7 @@
           <a href="{% url 'conversation' thread_id=thread.pk %}" class="user-name">
             {% if thread.other_participants|length == 1 %}
               {% with buddy=thread.other_participants.0 %}
-                {{ buddy.first_name }} {{ buddy.last_name.0 }}.<span class="online-indicator"></span>
+                {{ buddy.first_name }} {{ buddy.last_name.0 }}.{# Green dot removed from thread view #}
               {% endwith %}
             {% else %}
               Group Chat ({{ thread.participants.count }})
@@ -52,13 +52,13 @@
                 <h4 class="user-name">
                 {% if selected_thread.other_participants|length == 1 %}
                     {% with buddy=thread.other_participants.0 %}
-                    {{ buddy.first_name }} {{ buddy.last_name.0 }}.<span class="online-indicator"></span>
+                    {{ buddy.first_name }} {{ buddy.last_name.0 }}
                     {% endwith %}
                 {% else %}
                     {% for p in selected_thread.other_participants|slice:":3" %}{{ p.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
                     {% if selected_thread.other_participants|length > 3 %}...{% endif %}
                 {% endif %}
-                </h4>
+                <h4>
             </div>
 
             {# --- Call/Hangup Button Wrapper --- #}
@@ -78,6 +78,7 @@
             {% endif %}
         </div>
 
+        {# TYPING INDICATOR #}
         <div class="typing-indicator" id="typing-indicator" style="display: none; font-size: 0.85rem; color: rgba(var(--u-ink-inv-rgb), 0.6); height: 1.2em;">... is typing</div>
       </div>
       

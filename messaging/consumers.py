@@ -68,7 +68,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # If it's a "typing" message, just broadcast it to the group
             await self.channel_layer.group_send(
                 self.room_group_name,
-                {'type': 'typing_indicator', 'sender_id': data['sender_id']}
+                {
+                    'type': 'typing_indicator',
+                    'sender_id': data['sender_id'],
+                    'sender_first_name': data.get('sender_first_name', 'Someone') # <-- CHANGE HERE
+                }
             )
         
         elif message_type == 'webrtc_offer':
@@ -170,7 +174,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def typing_indicator(self, event):
         await self.send(text_data=json.dumps({
             'type': 'typing', 
-            'sender_id': event['sender_id']
+            'sender_id': event['sender_id'],
+            'sender_first_name': event.get('sender_first_name') # <-- CHANGE HERE
         }))
     
     

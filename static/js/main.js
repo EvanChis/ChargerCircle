@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.sender_id != currentUserId) {
                         typingIndicator.textContent = `${data.sender_first_name} is typing...`;
                         typingIndicator.style.display = 'block';
-
+                        // Hide it again after 2 seconds
                         setTimeout(() => {
                             typingIndicator.style.display = 'none';
                         }, 2000);
@@ -705,7 +705,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         // RT: Send typing status over WebSocket.
                         chatSocket.send(JSON.stringify({
                             'type': 'typing',
-                            'sender_id': currentUserId
+                            'sender_id': currentUserId,
+                            'sender_first_name': currentUserName // <-- CHANGE HERE
                         }));
                     }
                 });
