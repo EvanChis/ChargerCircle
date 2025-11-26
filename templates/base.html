@@ -12,8 +12,10 @@
     <title>Charger Circle</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=6">
     <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
     
-    {# This script now correctly targets document.body #}
+    {# Script moved here so document.body exists when it runs #}
     <script>
       try {
         if (localStorage.getItem('theme') === 'light') {
@@ -23,8 +25,6 @@
         // Ignore errors
       }
     </script>
-</head>
-<body class="{% block body_class %}{% endblock %}">
 
     {% if user.is_authenticated %}
     <header class="main-header">

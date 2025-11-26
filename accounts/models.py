@@ -1,30 +1,20 @@
 # accounts/models.py
 
-# Import models from django.db because this file defines database models.
 from django.db import models
-# Import AbstractUser from django.contrib.auth.models because 'User' is based on it.
 from django.contrib.auth.models import AbstractUser
-# Import CustomUserManager from .managers because the 'User' model needs it.
 from .managers import CustomUserManager
-# Import Course from rooms.models because 'User' needs a relation to it.
 from rooms.models import Course
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
 
-"""
-Author: Evan
-This class defines the main "User" account for the entire
-application. It's customized to use an email address instead
-of a username for logging in. It also stores the user's
-personal info (name, age), what courses they are in, and
-a list of their "buddies" (other users they have matched with).
-"""
 class User(AbstractUser):
-    # Custom setup to use email instead of username
     username = None
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=False)
     last_name = models.CharField(max_length=150, blank=False)
     
-    # Custom fields
     age = models.PositiveIntegerField(blank=True, null=True)
     courses = models.ManyToManyField(Course, related_name='students', blank=True)
     buddies = models.ManyToManyField('self', symmetrical=False, blank=True)
@@ -37,16 +27,12 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
-"""
-Author: Evan
-This class holds extra information that is attached to a
-User account. It's connected one-to-one with a User and
-stores their personal "bio". It also has a helper function
-to easily find the URL of the user's main profile picture.
-"""
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
+    
+    match_age_min = models.PositiveIntegerField(default=18)
+    match_age_max = models.PositiveIntegerField(default=99)
     
     @property
     def main_image_url(self):
@@ -58,13 +44,6 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.email} Profile'
 
-"""
-Author: Evan
-This class represents a single picture that a user has
-uploaded to their profile. It links the image file to the
-user's profile and includes a flag ('is_main') to mark
-which picture should be their main display photo.
-"""
 class ProfileImage(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='profile_images/')
@@ -74,16 +53,37 @@ class ProfileImage(models.Model):
     def __str__(self):
         return f"Image for {self.profile.user.email}"
 
-"""
-Author: Evan
-This class represents a "Like" from the Discover page. It
-records who gave the like ('from_user') and who received it
-('to_user'). These records are checked to see if a
-mutual match has occurred.
-RT: This table is created and checked by the real-time HTMX
-views on the Discover page.
-"""
-# This new model will track "likes" from the Discover page.
+    def save(self, *args, **kwargs):
+        if self.image:
+            if hasattr(self.image, 'seek'):
+                self.image.seek(0)
+
+            try:
+                img = Image.open(self.image)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                
+                max_size = (800, 800)
+                
+                if img.height > max_size[1] or img.width > max_size[0]:
+                    img.thumbnail(max_size, Image.Resampling.LANCZOS)
+                    output = BytesIO()
+                    img.save(output, format='JPEG', quality=75)
+                    output.seek(0)
+                    
+                    new_name = os.path.splitext(self.image.name)[0] + '.jpg'
+                    self.image = ContentFile(output.read(), name=new_name)
+                else:
+                    if hasattr(self.image, 'seek'):
+                        self.image.seek(0)
+
+            except Exception as e:
+                print(f"Error optimizing image: {e}")
+                if hasattr(self.image, 'seek'):
+                    self.image.seek(0)
+
+        super().save(*args, **kwargs)
+
 class Like(models.Model):
     from_user = models.ForeignKey(User, related_name='likes_given', on_delete=models.CASCADE)
     to_user = models.ForeignKey(User, related_name='likes_received', on_delete=models.CASCADE)
@@ -95,17 +95,6 @@ class Like(models.Model):
     def __str__(self):
         return f"{self.from_user.first_name} likes {self.to_user.first_name}"
 
-"""
-Author: Evan
-This class tracks every action a user takes on the Discover
-page (both "Likes" and "Skips"). This does two things:
-1. It prevents a user from seeing the same person again
-   in Discover.
-2. It creates a "history" that allows a user to undo their
-   last action.
-RT: This table is written to by the HTMX "like" and "skip"
-views and read by the HTMX "undo" view.
-"""
 class SkippedMatch(models.Model):
     ACTION_CHOICES = (
         ('skip', 'Skip'),
@@ -116,11 +105,9 @@ class SkippedMatch(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     action_type = models.CharField(max_length=4, choices=ACTION_CHOICES, default='skip')
 
-
     class Meta:
-        # Ensures we don't have duplicate skip entries
         unique_together = ('from_user', 'skipped_user')
-        ordering = ['-timestamp'] # Part of Undo
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"{self.from_user.first_name} {self.action_type}d {self.skipped_user.first_name}"

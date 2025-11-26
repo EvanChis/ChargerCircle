@@ -1,6 +1,8 @@
 # accounts/views.py
 
-import json # Import json because 'buddies_view' needs it to pass online user data.
+import json
+import os
+import requests # For Resend API
 
 # Import render, redirect, get_object_or_404 from django.shortcuts because almost all views need them.
 from django.shortcuts import render, redirect, get_object_or_404
@@ -22,6 +24,10 @@ from channels.layers import get_channel_layer
 # Import render_to_string from django.template.loader because (it's needed to turn HTML templates into strings).
 from django.template.loader import render_to_string
 from django.contrib import messages
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
 
 
 # Import CustomUserCreationForm, ProfileImageForm, ProfileUpdateForm from .forms because 'signup_view' and 'edit_profile_view' need them.
@@ -264,28 +270,91 @@ user logs in.
 def dashboard_view(request):
     return render(request, 'dashboard.html')
 
+# --- EMAIL VERIFICATION HELPERS ---
+
+def send_verification_email(user, request):
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    verify_url = request.build_absolute_uri(reverse('verify_email', kwargs={'uidb64': uid, 'token': token}))
+    
+    resend_api_key = os.environ.get('EMAIL_API_KEY')
+    if not resend_api_key:
+        print("ERROR: EMAIL_API_KEY not set.")
+        return
+
+    subject = "Verify your Charger Circle email"
+    html_content = f"""
+    <h2>Welcome to Charger Circle!</h2>
+    <p>Please click the link below to verify your @uah.edu email address and activate your account:</p>
+    <p><a href="{verify_url}">Verify Email</a></p>
+    <p>If you didn't sign up, you can ignore this email.</p>
+    """
+
+    try:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            json={
+                "from": "Charger Circle <onboarding@resend.dev>", # Or your verified domain
+                "to": [user.email],
+                "subject": subject,
+                "html": html_content
+            },
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json"
+            }
+        )
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Error sending verification email: {e}")
+
+# --- UPDATED SIGNUP & VERIFY VIEWS ---
+
 """
 Author: Evan
 This function handles the user sign-up page. It shows the
 form to a new user and, when they submit it, it creates
-their account, logs them in, and sends them to the dashboard.
+their account, sets it to inactive, sends a verification email,
+and shows a confirmation page.
 """
 def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.is_active = False # Deactivate until verified
+            user.save()
+            
             try:
                 # Get ALL hidden tags
                 hidden_tags = Course.objects.filter(tag_type='hidden')
                 user.courses.add(*hidden_tags)
             except Course.DoesNotExist:
                 pass
-            login(request, user)
-            return redirect('dashboard')
+            
+            # Send Email
+            send_verification_email(user, request)
+            
+            return render(request, 'accounts/verification_sent.html')
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/signup.html', {'form': form})
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        login(request, user)
+        messages.success(request, "Email verified! Welcome to Charger Circle.")
+        return redirect('dashboard')
+    else:
+        return HttpResponse('Activation link is invalid!', status=400)
 
 """
 Author: Evan
@@ -385,6 +454,8 @@ def get_profile_editor_context(request):
     profile_images = profile.images.order_by('-is_main', '-uploaded_at')
     update_form = ProfileUpdateForm(instance=request.user, initial={
         'bio': profile.bio,
+        'match_age_min': profile.match_age_min,
+        'match_age_max': profile.match_age_max,
         # Pass both interests and courses to the form initial data
         'interests': request.user.courses.filter(tag_type='interest'),
         'courses': request.user.courses.filter(tag_type='course'),
@@ -424,6 +495,8 @@ def edit_profile_view(request):
                 user.save()
                 
                 profile.bio = update_form.cleaned_data['bio']
+                profile.match_age_min = update_form.cleaned_data['match_age_min']
+                profile.match_age_max = update_form.cleaned_data['match_age_max']
                 profile.save()
                 
                 # Get all tag sets
@@ -483,12 +556,27 @@ def delete_profile_image(request, pk):
     # RT: This sends back an HTML partial for HTMX to swap
     return render(request, 'accounts/partials/profile_editor.html', context)
 
+"""
+Author: Evan
+This function permanently deletes the user's account. It is a
+destructive action that removes all user data. It logs the user
+out first to ensure a clean session termination.
+"""
+@login_required
+@require_POST
+def delete_account_view(request):
+    # Permanently delete the user account
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect('home')
+
 # Password Reset Views
 class PasswordResetView(auth_views.PasswordResetView):
     """Custom password reset view with our template"""
     template_name = 'accounts/password_reset.html'
     email_template_name = 'accounts/password_reset_email.html'
-    subject_template_name = 'accounts/password_reset_subject.txt'
+    # subject_template_name removed, now handled in form
     form_class = CustomPasswordResetForm
     success_url = '/accounts/password_reset/done/'
 
@@ -504,3 +592,4 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
     """Password reset successful confirmation"""
     template_name = 'accounts/password_reset_complete.html'
+

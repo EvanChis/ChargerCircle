@@ -251,6 +251,11 @@ def create_session_view(request):
             # Find or create a group chat thread for everyone involved
             thread = get_or_create_message_thread(all_participants)
             
+            # --- NAME THE THREAD FOR THE SESSION ---
+            thread.name = f"Session: {session.topic}"
+            thread.save()
+            # ---------------------------------------
+            
             # --- Create Invite Message ---
             # Uses the constant to build the invite string
             invite_content = f"{SESSION_INVITE_PREFIX}{session.id}::{request.user.first_name} invited you to a session for {session.course.name} on the topic: {session.topic}"

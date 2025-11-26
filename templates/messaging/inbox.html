@@ -18,7 +18,9 @@
         <li class="user-presence-container {% if selected_thread and selected_thread.pk == thread.pk %}active{% endif %}"
             data-user-pk="{% for p in thread.other_participants %}{{ p.pk }}{% endfor %}">
           <a href="{% url 'conversation' thread_id=thread.pk %}" class="user-name">
-            {% if thread.other_participants|length == 1 %}
+            {% if thread.name %}
+              {{ thread.name }}
+            {% elif thread.other_participants|length == 1 %}
               {% with buddy=thread.other_participants.0 %}
                 {{ buddy.first_name }} {{ buddy.last_name.0 }}.{# Green dot removed from thread view #}
               {% endwith %}
@@ -47,39 +49,53 @@
     {% if selected_thread %}
       
       <div class="chat-header">
-        <div class="chat-header-main">
-            <div class="user-presence-container" data-user-pk="{% for p in selected_thread.other_participants %}{{ p.pk }}{% endfor %}">
-                <h4 class="user-name">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            
+            <div class="chat-header-left" style="display: flex; flex-direction: column; align-items: flex-start;">
+                <div class="user-presence-container" data-user-pk="{% for p in selected_thread.other_participants %}{{ p.pk }}{% endfor %}">
+                    <h4 class="user-name" style="margin: 0;">
+                    {% if selected_thread.name %}
+                        {{ selected_thread.name }}
+                    {% elif selected_thread.other_participants|length == 1 %}
+                        {% with buddy=selected_thread.other_participants.0 %}
+                        {{ buddy.first_name }} {{ buddy.last_name.0 }}
+                        {% endwith %}
+                    {% else %}
+                        {% for p in selected_thread.other_participants|slice:":3" %}{{ p.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        {% if selected_thread.other_participants|length > 3 %}...{% endif %}
+                    {% endif %}
+                    </h4>
+                </div>
+                {# TYPING INDICATOR (Now on the left) #}
+                <div class="typing-indicator" id="typing-indicator" style="display: none; font-size: 0.85rem; color: rgba(var(--u-ink-inv-rgb), 0.6); height: 1.2em; margin-top: 2px;">... is typing</div>
+            </div>
+
+            <div class="chat-header-right" style="display: flex; gap: 10px; align-items: center;">
+                
+                {# Call/Hangup Controls (Only 1-on-1) #}
                 {% if selected_thread.other_participants|length == 1 %}
-                    {% with buddy=thread.other_participants.0 %}
-                    {{ buddy.first_name }} {{ buddy.last_name.0 }}
-                    {% endwith %}
-                {% else %}
-                    {% for p in selected_thread.other_participants|slice:":3" %}{{ p.first_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                    {% if selected_thread.other_participants|length > 3 %}...{% endif %}
+                <div id="call-controls">
+                    {# Call Icon #}
+                    <button class="btn btn-secondary btn-sm" id="voice-call-button" title="Start voice call">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#666666"><path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"/></svg>
+                    </button>
+                    
+                    {# Hang Up Icon #}
+                    <button class="btn btn-danger btn-sm" id="hang-up-button" title="End call" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#666666"><path d="m136-304-92-90q-12-12-12-28t12-28q88-95 203-142.5T480-640q118 0 232.5 47.5T916-450q12 12 12 28t-12 28l-92 90q-11 11-25.5 12t-26.5-8l-116-88q-8-6-12-14t-4-18v-114q-38-12-78-19t-82-7q-42 0-82 7t-78 19v114q0 10-4 18t-12 14l-116 88q-12 9-26.5 8T136-304Zm104-198q-29 15-56 34.5T128-424l40 40 72-56v-62Zm480 2v60l72 56 40-38q-29-26-56-45t-56-33Zm-480-2Zm480 2Z"/></svg>
+                    </button>
+                </div>
                 {% endif %}
-                <h4>
-            </div>
 
-            {# --- Call/Hangup Button Wrapper --- #}
-            {% if selected_thread.other_participants|length == 1 %}
-            <div id="call-controls">
-                
-                {# Call Icon #}
-                <button class="btn btn-secondary btn-sm" id="voice-call-button" title="Start voice call">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#666666"><path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"/></svg>
-                </button>
-                
-                {# Hang Up Icon #}
-                <button class="btn btn-danger btn-sm" id="hang-up-button" title="End call" style="display: none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px" fill="#666666"><path d="m136-304-92-90q-12-12-12-28t12-28q88-95 203-142.5T480-640q118 0 232.5 47.5T916-450q12 12 12 28t-12 28l-92 90q-11 11-25.5 12t-26.5-8l-116-88q-8-6-12-14t-4-18v-114q-38-12-78-19t-82-7q-42 0-82 7t-78 19v114q0 10-4 18t-12 14l-116 88q-12 9-26.5 8T136-304Zm104-198q-29 15-56 34.5T128-424l40 40 72-56v-62Zm480 2v60l72 56 40-38q-29-26-56-45t-56-33Zm-480-2Zm480 2Z"/></svg>
-                </button>
+                {# Leave Group Button (Only for group chats) #}
+                {% if selected_thread.participants.count > 2 %}
+                <form method="post" action="{% url 'leave_thread' thread_id=selected_thread.pk %}" data-confirm="Are you sure you want to leave this group chat?">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-secondary">Leave</button>
+                </form>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
-
-        {# TYPING INDICATOR #}
-        <div class="typing-indicator" id="typing-indicator" style="display: none; font-size: 0.85rem; color: rgba(var(--u-ink-inv-rgb), 0.6); height: 1.2em;">... is typing</div>
       </div>
       
       <div class="message-list" id="message-list">
@@ -111,7 +127,7 @@
               hx-post="{% url 'upload_chat_image' thread_id=selected_thread.pk %}"
               hx-encoding="multipart/form-data" 
               hx-swap="none"
-              hx-trigger="change from:#chat-image-input">
+              hx-trigger="change">
             {% csrf_token %}
             <input type="file" name="image" id="chat-image-input" class="visually-hidden" accept="image/*">
         </form>
