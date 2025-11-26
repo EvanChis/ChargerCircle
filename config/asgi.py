@@ -1,21 +1,16 @@
 # config/asgi.py
 
-# Import os because it's needed to set the 'DJANGO_SETTINGS_MODULE' environment variable.
 import os
-# Import get_asgi_application from django.core.asgi because 'django_asgi_app' needs it to handle standard HTTP requests.
 from django.core.asgi import get_asgi_application
-# Import ProtocolTypeRouter, URLRouter from channels.routing because 'application' needs them to split traffic.
-from channels.routing import ProtocolTypeRouter, URLRouter
-# Import AuthMiddlewareStack from channels.auth because 'application' needs it to give WebSockets access to the logged-in user.
-from channels.auth import AuthMiddlewareStack
-# Import routing from rooms because 'application' needs its list of WebSocket URLs.
-from rooms import routing as rooms_routing
-# Import routing from messaging because 'application' needs its list of WebSocket URLs.
-from messaging import routing as messaging_routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 django_asgi_app = get_asgi_application()
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from rooms import routing as rooms_routing
+from messaging import routing as messaging_routing
 
 """
 Author: Evan
@@ -36,4 +31,3 @@ application = ProtocolTypeRouter({
         )
     ),
 })
-
