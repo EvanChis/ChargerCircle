@@ -11,6 +11,8 @@ load_dotenv(BASE_DIR / '.env')
 SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-local-development-key-only')
 DEBUG = os.getenv('DEBUG', '1') == '1'
 
+ALLOWED_HOSTS = ['*']
+
 # This prevents "403 Forbidden" errors on the live site
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000').split(',')
 
