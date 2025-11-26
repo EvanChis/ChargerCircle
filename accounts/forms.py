@@ -91,10 +91,10 @@ class CustomPasswordResetForm(PasswordResetForm):
         html_content = render_to_string(email_template_name, context)
 
         # Get API Key
-        resend_api_key = os.environ.get('RESEND_API_KEY')
+        resend_api_key = os.environ.get('EMAIL_API_KEY')
         
         if not resend_api_key:
-            print("ERROR: RESEND_API_KEY not set. Cannot send password reset.")
+            print("ERROR: EMAIL_API_KEY not set. Cannot send password reset.")
             return
 
         try:
