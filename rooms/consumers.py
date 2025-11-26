@@ -48,7 +48,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             # This handles cases where the user refreshes or briefly disconnects
             if self.user.pk in offline_tasks:
                 offline_tasks[self.user.pk].cancel()
-                del offline_tasks[self.user.pk]
+                # Safely remove from dict if it exists to avoid later errors
+                try:
+                    del offline_tasks[self.user.pk]
+                except KeyError:
+                    pass
 
             # Add user to their personal group and the global group
             await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -87,17 +91,22 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     RT: Marks the user as offline if they haven't reconnected within the delay.
     """
     async def delayed_disconnect(self):
-        # Wait for 10 seconds
-        await asyncio.sleep(10)
-        # If the task hasn't been cancelled, mark the user as offline
-        await self.update_user_presence(is_online=False)
-        # Clean up the task from our dictionary
-        if self.user.pk in offline_tasks:
-            del offline_tasks[self.user.pk]
+        try:
+            # Wait for 10 seconds
+            await asyncio.sleep(10)
+            # If the task hasn't been cancelled, mark the user as offline
+            await self.update_user_presence(is_online=False)
+            # Clean up the task from our dictionary
+            if self.user.pk in offline_tasks:
+                del offline_tasks[self.user.pk]
+        except asyncio.CancelledError:
+            # This catches the error if the task is cancelled while sleeping
+            # We do nothing here, essentially keeping the user "online"
+            pass
 
     """
     Receives a notification message sent specifically to this user's
-    group and forwards it down the WebSocket to their browser.
+    group and forwards it down the WebSocket to the user's browser.
     RT: Pushes a personal notification (like "You Matched!") to the browser.
     """
     async def send_notification(self, event):
@@ -193,3 +202,4 @@ class RoomConsumer(AsyncWebsocketConsumer):
     async def broadcast_message(self, event):
         # when server broadcasts a new thread/post, sends it straight to browser
         await self.send(text_data=json.dumps(event))
+
