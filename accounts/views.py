@@ -294,7 +294,7 @@ def send_verification_email(user, request):
         response = requests.post(
             "https://api.resend.com/emails",
             json={
-                "from": "Charger Circle <onboarding@resend.dev>", # Or your verified domain
+                "from": "Charger Circle <noreply@girlstanding.app>", # Or your verified domain
                 "to": [user.email],
                 "subject": subject,
                 "html": html_content
