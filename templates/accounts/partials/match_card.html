@@ -32,18 +32,22 @@
     {% endif %}
   </div>
   
-  <div class="profile-info">
+  <div class="profile-details">
     <h2>{{ match.user.first_name }} {{ match.user.last_name }}, {{ match.user.age }}</h2>
     
-    {# Use 'shared_tags' from find_matches service #}
-    {% if match.shared_tags %}
-      <div class="course-tags">
-          {% for tag in match.shared_tags %}
-              <span class="course-tag">{{ tag.name }}</span>
-          {% endfor %}
-      </div>
+    {% if match.user.profile.bio %}
+      <p class="profile-bio">{{ match.user.profile.bio }}</p>
     {% endif %}
   </div>
+  
+  {# Use 'shared_tags' from find_matches service #}
+  {% if match.shared_tags %}
+    <div class="profile-tags">
+      {% for tag in match.shared_tags %}
+        <span class="course-tag">{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <div class="cta-buttons match-actions">
     <form id="skip-form" hx-post="{% url 'skip_match' pk=match.user.pk %}" hx-target=".match-card-wrapper" hx-swap="innerHTML" hx-trigger="submitSkip from:body">

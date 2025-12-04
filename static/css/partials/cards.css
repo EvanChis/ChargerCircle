@@ -84,18 +84,79 @@
   border-left: 4px solid var(--u-primary);
 }
 
-/* Course Room / Thread Posts */
-.post-meta { 
+/* Thread detail page - Post items */
+#thread-detail-page .card.post-item,
+#thread-detail-page .card.original-post {
+  background: var(--card-bg-color);
+  border: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+#thread-detail-page .card.post-item strong,
+#thread-detail-page .card.original-post strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(var(--u-ink-inv-rgb) / 0.9);
+}
+
+#thread-detail-page .card.post-item .post-meta,
+#thread-detail-page .card.original-post .post-meta {
   display: flex;
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 0.5rem; 
-  color: rgba(var(--u-ink-inv-rgb) / 0.7); 
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
 }
-.post-actions { 
-  display: flex; 
-  gap: 0.5rem; 
+
+#thread-detail-page .card.post-item .post-actions,
+#thread-detail-page .card.original-post .post-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
-.post-content { 
-  padding-left: 0.5rem; 
+
+#thread-detail-page .card.post-item .post-actions .btn,
+#thread-detail-page .card.original-post .post-actions .btn {
+  margin: 0;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+#thread-detail-page .card.post-item .post-content,
+#thread-detail-page .card.original-post .post-content {
+  padding: 0;
+  margin-top: 0.75rem;
+  line-height: 1.6;
+  color: rgba(var(--u-ink-inv-rgb) / 0.95);
+}
+
+#thread-detail-page .card.post-item .post-content p,
+#thread-detail-page .card.original-post .post-content p {
+  margin: 0 0 0.75rem 0;
+}
+
+#thread-detail-page .card.post-item .post-content p:last-child,
+#thread-detail-page .card.original-post .post-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Thread detail page - Other styles */
+#thread-detail-page .meta {
+  color: rgba(var(--u-ink-inv-rgb) / 0.7);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+#thread-detail-page #post-list {
+  margin-bottom: 2rem;
+}
+
+#thread-detail-page #post-list > p {
+  color: rgba(var(--u-ink-inv-rgb) / 0.6);
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
 }
