@@ -13,6 +13,6 @@ sign up or log in.
 """
 def home_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('discover')
     return render(request, 'home.html')
 

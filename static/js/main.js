@@ -98,8 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Global WebSocket for Notifications and Presence ---
     const mainNav = document.querySelector('.main-nav'); // Check if the main nav exists (user is logged in)
     if (mainNav) {
+        // FIX 1: Use secure protocol if on HTTPS
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         // RT: Connect to the '/ws/notifications/' WebSocket endpoint.
-        const notificationSocket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+        const notificationSocket = new WebSocket(protocol + window.location.host + '/ws/notifications/');
 
         /*
         Author: Oju
@@ -381,8 +383,10 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             // --- END: WebRTC Variables ---
 
+            // FIX 2: Use secure protocol if on HTTPS
+            const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
             // RT: Connect to the specific chat thread's WebSocket endpoint.
-            const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + threadId + '/');
+            const chatSocket = new WebSocket(protocol + window.location.host + '/ws/chat/' + threadId + '/');
 
             // --- NEW: Call UI Toggle Function ---
             const setInCallUI = (inCall) => {
@@ -488,15 +492,19 @@ document.addEventListener('DOMContentLoaded', function () {
             // --- WebRTC `hangUp` and `closeCall` Functions ---
             const hangUp = () => {
                 console.log('Hanging up call...');
-                
-                // Send hangup signal
-                chatSocket.send(JSON.stringify({
-                    'type': 'webrtc_hangup',
-                    'sender_id': currentUserId
-                }));
-                
-                // Clean up the connection locally
-                closeCall();
+    
+                try {
+                    // Try to send the hangup signal
+                    chatSocket.send(JSON.stringify({
+                        'type': 'webrtc_hangup',
+                        'sender_id': currentUserId
+                    }));
+                } catch (error) {
+                    console.warn('Could not send hangup signal, socket likely closed:', error);
+                } finally {
+                    // ALWAYS clean up the connection locally, even if send fails
+                    closeCall();
+                }
             };
             
             const closeCall = () => {
@@ -560,9 +568,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 const data = JSON.parse(e.data);
 
                 if (data.type === 'typing') {
-                    // Only show typing indicator if it's from someone else
                     if (data.sender_id != currentUserId) {
-                        typingIndicator.style.display = 'block'; // Show "... is typing"
+                        typingIndicator.textContent = `${data.sender_first_name} is typing...`;
+                        typingIndicator.style.display = 'block';
                         // Hide it again after 2 seconds
                         setTimeout(() => {
                             typingIndicator.style.display = 'none';
@@ -701,7 +709,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         // RT: Send typing status over WebSocket.
                         chatSocket.send(JSON.stringify({
                             'type': 'typing',
-                            'sender_id': currentUserId
+                            'sender_id': currentUserId,
+                            'sender_first_name': currentUserName // <-- CHANGE HERE
                         }));
                     }
                 });
@@ -731,8 +740,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const courseDetailPage = document.getElementById('course-detail-page');
     if (courseDetailPage) { // Only run if on a course detail page
         const roomSlug = courseDetailPage.dataset.roomSlug; // Get the unique ID for the room
+        
+        // FIX 3: Use secure protocol if on HTTPS
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         // RT: Connect to the course room's WebSocket endpoint.
-        const roomSocket = new WebSocket('ws://' + window.location.host + '/ws/course_room/' + roomSlug + '/');
+        const roomSocket = new WebSocket(protocol + window.location.host + '/ws/course_room/' + roomSlug + '/');
 
         /*
         Author: Oju

@@ -22,28 +22,6 @@
 .message.sent .message-sender-name { display: none; }
 
 /* --- Styles for Image Upload Button --- */
-.chat-form-container form {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-/* Style the paperclip button */
-#chat-image-button {
-  padding: 0.5rem;
-  min-width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background-color: var(--u-surface-container-high);
-  color: var(--u-on-surface-variant);
-}
-
-#chat-image-button:hover {
-  background-color: var(--u-surface-container-highest);
-  color: var(--u-on-surface);
-}
-
 /* Make the text input field take the remaining space */
 .chat-form-container #chat-form {
   flex-grow: 1;
@@ -57,41 +35,3 @@
   display: none;
 }
 
-/* --- Styles for Call Controls --- */
-.chat-header-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Make the call buttons the same size */
-#call-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-#call-controls .btn {
-  padding: 0.5rem;
-  min-width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  /* Add a transition for the rotation */
-  transition: all 150ms ease-in-out;
-}
-#call-controls .btn svg {
-  /* Add transition for the icon itself */
-  transition: transform 150ms ease-in-out;
-}
-
-/* hangup button */
-#call-controls .btn-danger {
-  background-color: var(--btn-danger-bg-color);
-  color: var(--btn-danger-text-color);
-}
-#call-controls .btn-danger:hover {
-  background-color: var(--btn-danger-hover-bg-color);
-  color: var(--btn-danger-hover-text-color);
-}
-/* This rotates the phone icon to look like "hang up" */
-#call-controls .btn-danger svg {
-  transform: rotate(135deg);
-}

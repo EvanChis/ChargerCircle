@@ -9,6 +9,7 @@ from .views import (
     session_detail_view, delete_session_view, leave_session_view,
     session_participants_view,
     edit_post_view, delete_post_view,
+    manual_maintenance,
 )
 
 """
@@ -24,6 +25,8 @@ and getting the updated participant list for a session.
 urlpatterns = [
     # Main page showing the list of all course rooms
     path('', course_list_view, name='course_list'),
+
+    path('maintenance/', manual_maintenance, name='manual_maintenance'),
     
     # Post URLs
     path('post/edit/<int:pk>/', edit_post_view, name='edit_post'), # RT: HTMX URL for getting the post edit form
