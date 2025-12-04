@@ -487,7 +487,8 @@ def delete_profile_image(request, pk):
 class PasswordResetView(auth_views.PasswordResetView):
     """Custom password reset view with our template"""
     template_name = 'accounts/password_reset.html'
-    email_template_name = 'accounts/password_reset_email.html'
+    email_template_name = 'accounts/password_reset_email.txt'
+    html_email_template_name = 'accounts/password_reset_email.html'
     subject_template_name = 'accounts/password_reset_subject.txt'
     form_class = CustomPasswordResetForm
     success_url = '/accounts/password_reset/done/'
