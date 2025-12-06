@@ -27,3 +27,20 @@ def split(value, key):
     # Splits a string by the given key.
     
     return value.split(key)
+
+@register.filter
+def linkify(text):
+    if not text:
+        return ""
+
+    # Escape HTML from users
+    safe_text = escape(text)
+
+    # Replace URLs with clickable links
+    def replace(match):
+        url = match.group(0)
+        return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
+
+    linked_text = URL_REGEX.sub(replace, safe_text)
+
+    return mark_safe(linked_text)

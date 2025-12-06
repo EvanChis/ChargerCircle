@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load messaging_extras %}
 
 {% comment %} Author: Cole {% endcomment %}
 {% comment %} HTMX: This page displays the user's private messages. It uses HTMX
@@ -114,7 +115,7 @@
                   <img src="{{ message.image.url }}" class="chat-image" alt="User image" style="max-width: 100%; border-radius: 12px; margin-top: 5px;">
                 {% endif %}
                 {% if message.content %}
-                  <p>{{ message.content }}</p>
+                  <p>{{ message.content|linkify }}</p>
                 {% endif %}
               </div>
             {% endif %}
