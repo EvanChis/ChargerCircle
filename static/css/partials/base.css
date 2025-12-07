@@ -45,3 +45,15 @@ body.logged-out main { padding: 2rem 1.5rem; }
 .course-tag:hover { 
   background-color: rgba(var(--u-primary-rgb) / 0.4); 
 }
+
+/* Mobile Optimizations for Layout */
+@media (max-width: 600px) {
+  .content-wrapper {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+  
+  h2 {
+    font-size: 2rem; /* Smaller headings */
+  }
+}

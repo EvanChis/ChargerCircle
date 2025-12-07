@@ -17,3 +17,28 @@
 /* Nav Profile Placeholder */
 .nav-profile-placeholder { display: flex; align-items: center; justify-content: center; background-color: var(--u-accent-color); color: white; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; }
 .nav-profile-placeholder span { line-height: 1; }
+
+/* Mobile Optimizations for Header */
+@media (max-width: 768px) {
+  .main-nav {
+    flex-direction: column;
+    padding: 0.5rem;
+    height: auto;
+  }
+
+  .nav-brand {
+    margin-bottom: 0.5rem;
+  }
+
+  .main-nav ul {
+    gap: 1rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  /* Adjust body padding because header is taller now */
+  body {
+    padding-top: 110px; 
+  }
+}

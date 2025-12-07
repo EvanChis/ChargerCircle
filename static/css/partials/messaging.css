@@ -35,3 +35,28 @@
   display: none;
 }
 
+/* Mobile Optimizations for Messaging */
+@media (max-width: 768px) {
+  .messaging-container {
+    flex-direction: column;
+    height: calc(100vh - 110px); /* Adjust for taller header */
+  }
+
+  .buddy-list-sidebar {
+    width: 100%;
+    height: 150px; /* Short scrollable list at the top */
+    min-height: 150px;
+    border-right: none;
+    border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
+    box-sizing: border-box;
+  }
+
+  .chat-window {
+    height: 100%;
+  }
+  
+  /* Hide the huge "No chat selected" message on mobile to save space */
+  .no-chat-selected {
+    display: none;
+  }
+}
