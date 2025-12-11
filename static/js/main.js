@@ -347,6 +347,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
+    // --- Mobile Hamburger Menu ---
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (hamburgerMenu && navLinks) {
+        hamburgerMenu.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            hamburgerMenu.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        });
+        
+        // Close menu when a nav link is clicked
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerMenu.classList.remove('active');
+                navLinks.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            });
+        });
+    }
+    
     /*
     Author: Oju
     This section manages the real-time chat functionality on the
