@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charger Circle</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=9">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=14">
     <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -32,7 +32,14 @@
             <a href="{% url 'dashboard' %}" class="nav-brand" style="display: flex; align-items: center;">
               <img src="{% static 'img/logo.png' %}" alt="Charger Circle" class="nav-profile-pic" style="width: 45px; height: 45px; border: 2px solid var(--u-accent-color);">
             </a>
-            <ul>
+            
+            <button class="hamburger-menu" id="hamburger-menu" aria-label="Toggle navigation menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <ul class="nav-links" id="nav-links">
                 <li><a href="{% url 'discover' %}">Discover</a></li>
                 <li><a href="{% url 'buddies' %}">Connections</a></li>
                 <li><a href="{% url 'sessions' %}">Sessions</a></li>
@@ -82,7 +89,7 @@
     </script>
     {% endif %}
 
-    <script src="{% static 'js/main.js' %}" defer></script>
+    <script src="{% static 'js/main.js' %}?v=3" defer></script>
     
     {% block extra_scripts %}{% endblock extra_scripts %}
 </body>

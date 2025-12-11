@@ -47,6 +47,8 @@
       <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
     </form>
   </div>
-  <p style="margin-top: 1rem; text-align: center;"><a href="{% url 'login' %}">Don't have an account? Log In</a></p>
+  <div class="auth-links">
+    <p><a href="{% url 'login' %}" class="auth-link">Already have an account? Log In</a></p>
+  </div>
 </div>
 {% endblock content %}
