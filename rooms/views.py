@@ -255,6 +255,7 @@ def create_session_view(request):
             # Uses the constant to build the invite string
             invite_content = f"{SESSION_INVITE_PREFIX}{session.id}::{request.user.first_name} invited you to a session for {session.course.name} on the topic: {session.topic}"
             new_message = Message.objects.create(thread=thread, sender=request.user, content=invite_content)
+            thread.save()  # Update thread's timestamp for sorting
             # --- End Invite Message ---
             
             # --- Real-Time Broadcasts ---

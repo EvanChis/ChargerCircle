@@ -92,6 +92,7 @@ def upload_chat_image_view(request, thread_id):
             image=image
         )
         new_message.save() # Save to get the image URL
+        thread.save()  # Update thread's timestamp for sorting
 
         # --- Real-Time Broadcast ---
         channel_layer = get_channel_layer()
