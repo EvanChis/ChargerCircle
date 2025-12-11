@@ -10,7 +10,7 @@
       
 
 {% block content %}
-<div class="messaging-container">
+<div class="messaging-container{% if selected_thread %} chat-active{% endif %}">
   <aside class="buddy-list-sidebar">
     <h3>Messages</h3>
     <ul class="styled-list">
@@ -45,6 +45,13 @@
     <audio id="remote-audio" autoplay playsinline></audio>
     
     {% if selected_thread %}
+      
+      <a href="{% url 'inbox' %}" class="back-to-messages">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 20px; height: 20px;">
+          <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z" clip-rule="evenodd" />
+        </svg>
+        Back to Messages
+      </a>
       
       <div class="chat-header">
         <div class="chat-header-main">
