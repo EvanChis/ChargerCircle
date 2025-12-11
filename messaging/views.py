@@ -63,6 +63,8 @@ def upload_chat_image_view(request, thread_id):
             image=image
         )
         # REMOVED: new_message.save() -- This was causing a double-save/optimization loop
+        # Message.objects.create() already calls .save(), which triggers image optimization
+        thread.save()  # Update thread's timestamp for sorting
 
         # --- Real-Time Broadcast ---
         channel_layer = get_channel_layer()

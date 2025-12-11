@@ -48,3 +48,58 @@ form textarea { min-height: 120px; }
   margin-top: 0.5rem;
   margin-bottom: 0;
 }
+
+/* Auth Page Styles */
+.auth-description {
+  text-align: center;
+  color: rgba(var(--u-ink-inv-rgb) / 0.6);
+  margin-bottom: 2rem;
+}
+
+/* Auth Page Links */
+.auth-links {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.auth-links p {
+  margin: 0.75rem 0;
+}
+
+.auth-link {
+  color: var(--u-accent-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 200ms ease;
+  position: relative;
+}
+
+.auth-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--u-primary-color), var(--u-accent-color));
+  transition: width 200ms ease;
+}
+
+.auth-link:hover {
+  color: var(--u-ink-inv-color);
+}
+
+.auth-link:hover::after {
+  width: 100%;
+}
+
+.auth-link-secondary {
+  color: rgba(var(--u-ink-inv-rgb) / 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 200ms ease;
+}
+
+.auth-link-secondary:hover {
+  color: var(--u-accent-color);
+}

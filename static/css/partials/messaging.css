@@ -22,6 +22,28 @@
 .message.sent .message-sender-name { display: none; }
 
 /* --- Styles for Image Upload Button --- */
+.chat-form-container form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Style the paperclip button */
+#chat-image-button {
+  padding: 0.5rem;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--u-surface-container-high);
+  color: var(--u-on-surface-variant);
+}
+
+#chat-image-button:hover {
+  background-color: var(--u-surface-container-highest);
+  color: var(--u-on-surface);
+}
+
 /* Make the text input field take the remaining space */
 .chat-form-container #chat-form {
   flex-grow: 1;
@@ -35,28 +57,164 @@
   display: none;
 }
 
-/* Mobile Optimizations for Messaging */
+/* --- Styles for Call Controls --- */
+.chat-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Make the call buttons the same size */
+#call-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+#call-controls .btn {
+  padding: 0.5rem;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  /* Add a transition for the rotation */
+  transition: all 150ms ease-in-out;
+}
+#call-controls .btn svg {
+  /* Add transition for the icon itself */
+  transition: transform 150ms ease-in-out;
+}
+
+/* hangup button */
+#call-controls .btn-danger {
+  background-color: var(--btn-danger-bg-color);
+  color: var(--btn-danger-text-color);
+}
+#call-controls .btn-danger:hover {
+  background-color: var(--btn-danger-hover-bg-color);
+  color: var(--btn-danger-hover-text-color);
+}
+/* This rotates the phone icon to look like "hang up" */
+#call-controls .btn-danger svg {
+  transform: rotate(135deg);
+}
+
+/* Mobile Responsive Messaging */
 @media (max-width: 768px) {
   .messaging-container {
     flex-direction: column;
-    height: calc(100vh - 110px); /* Adjust for taller header */
-  }
-
-  .buddy-list-sidebar {
+    height: auto;
+    min-height: calc(100vh - 60px);
     width: 100%;
-    height: 150px; /* Short scrollable list at the top */
-    min-height: 150px;
-    border-right: none;
-    border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
-    box-sizing: border-box;
-  }
-
-  .chat-window {
-    height: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
   
-  /* Hide the huge "No chat selected" message on mobile to save space */
-  .no-chat-selected {
+  .buddy-list-sidebar {
+    width: 100%;
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
+    max-height: none;
+    padding: 0.75rem;
+    box-sizing: border-box;
+  }
+  
+  /* Fix list items on mobile */
+  .buddy-list-sidebar .styled-list {
+    width: 100%;
+  }
+  
+  .buddy-list-sidebar .styled-list li {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* When a chat is selected, hide sidebar on mobile */
+  .messaging-container.chat-active .buddy-list-sidebar {
+    display: none;
+  }
+  
+  .chat-window {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* When no chat is selected, hide chat window on mobile */
+  .messaging-container:not(.chat-active) .chat-window {
+    display: none;
+  }
+  
+  /* Show "back to messages" when chat is active */
+  .back-to-messages {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--u-accent-color);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(var(--u-ink-inv-rgb) / 0.1);
+  }
+  
+  .back-to-messages:hover {
+    background-color: rgba(var(--u-primary-rgb) / 0.1);
+  }
+  
+  .message-list {
+    padding: 1rem;
+    max-height: calc(100vh - 200px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .message {
+    max-width: 85%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .chat-header {
+    padding: 0.75rem 1rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .chat-form-container {
+    padding: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .chat-form-container form {
+    gap: 0.5rem;
+    width: 100%;
+  }
+  
+  /* Fix input overflow */
+  .chat-form-container .message-input {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  #chat-image-button {
+    min-width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  
+  /* Fix send button */
+  .chat-form-container .btn-primary {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Hide back button on desktop */
+@media (min-width: 769px) {
+  .back-to-messages {
     display: none;
   }
 }

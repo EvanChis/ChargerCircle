@@ -18,27 +18,99 @@
 .nav-profile-placeholder { display: flex; align-items: center; justify-content: center; background-color: var(--u-accent-color); color: white; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; }
 .nav-profile-placeholder span { line-height: 1; }
 
-/* Mobile Optimizations for Header */
+/* Hamburger Menu - Hidden by default on desktop */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: var(--u-ink-inv-color);
+  border-radius: 2px;
+  transition: all 200ms ease-in-out;
+}
+
+/* Hamburger animation when open */
+.hamburger-menu.active .hamburger-line:nth-child(1) {
+  transform: translateY(8.5px) rotate(45deg);
+}
+.hamburger-menu.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-menu.active .hamburger-line:nth-child(3) {
+  transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-  .main-nav {
-    flex-direction: column;
-    padding: 0.5rem;
-    height: auto;
-  }
-
-  .nav-brand {
-    margin-bottom: 0.5rem;
-  }
-
-  .main-nav ul {
-    gap: 1rem;
-    font-size: 0.9rem;
-    flex-wrap: wrap;
-    justify-content: center;
+  /* Show hamburger menu on mobile */
+  .hamburger-menu {
+    display: flex;
   }
   
-  /* Adjust body padding because header is taller now */
-  body {
-    padding-top: 110px; 
+  /* Nav links mobile styling - hidden by default */
+  .main-nav ul.nav-links {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background-color: var(--header-bg-color);
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 2rem;
+    gap: 0.5rem;
+    z-index: 999;
+    overflow-y: auto;
+  }
+  
+  /* Show nav links when menu is open */
+  .main-nav ul.nav-links.active {
+    display: flex;
+  }
+  
+  /* Style nav items on mobile */
+  .main-nav .nav-links li {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .main-nav .nav-links li a {
+    display: block;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+  
+  .main-nav .nav-links li a:hover {
+    background-color: rgba(var(--u-primary-rgb) / 0.2);
+  }
+  
+  /* Theme toggle and profile on mobile */
+  .theme-toggle {
+    margin: 1rem auto;
+  }
+  
+  .nav-profile-pic {
+    margin: 0.5rem auto;
+  }
+  
+  /* Prevent body scroll when menu is open */
+  body.menu-open {
+    overflow: hidden;
   }
 }
