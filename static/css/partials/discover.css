@@ -23,7 +23,7 @@
   box-shadow: 0 10px 30px rgba(var(--black-rgb) / 0.2), 0 0 0 1px var(--u-surface-container);
   padding: 0;
   width: 100%;
-  max-width: 450px;
+  max-width: 1000px;
   display: flex;
   flex-direction: column;
   overflow: hidden;

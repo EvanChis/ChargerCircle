@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body_class %}logged-out{% endblock %}
+
+{% block content %}
+<div class="logged-out-header">
+  <a href="{% url 'home' %}">Charger Circle</a>
+</div>
+
+<div class="content-wrapper">
+  <h2 style="text-align: center;">Check Your Email</h2>
+  <div class="card" style="text-align: center;">
+    <div style="margin-bottom: 1.5rem; color: var(--u-primary-color);">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <p>We've sent a verification link to your <strong>@uah.edu</strong> email address.</p>
+    <p>Please click the link in that email to activate your account and start connecting.</p>
+    <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 1.5rem;">
+      Didn't receive it? Check your spam folder.
+    </p>
+  </div>
+  
+  <div style="text-align: center; margin-top: 2rem;">
+    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+  </div>
+</div>
+{% endblock content %}

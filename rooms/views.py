@@ -1,72 +1,52 @@
 # rooms/views.py
 
-# Import json because 'session_detail_view' needs it to pass online user data.
-import json # for making green online dot independent so it doesn't flash
-
-# Import render, get_object_or_404, redirect from django.shortcuts because most views need them.
+import json 
 from django.shortcuts import render, get_object_or_404, redirect
-# Import login_required from django.contrib.auth.decorators because most views need it.
 from django.contrib.auth.decorators import login_required
-# Import render_to_string from django.template.loader because 'course_detail_view', 'thread_detail_view' need it.
 from django.template.loader import render_to_string
-# Import HttpResponse, HttpResponseForbidden from django.http because several views need them.
 from django.http import HttpResponse, HttpResponseForbidden
-# Import require_POST from django.views.decorators.http because several views need it.
 from django.views.decorators.http import require_POST
-# Import Count from django.db.models because 'get_pending_invites_count' needs it (though not directly used here, maybe previously).
 from django.db.models import Count
+from django.core.management import call_command
+from django.contrib.admin.views.decorators import staff_member_required
 
-# Import models from .models because Course, Thread, Post, Session are needed by most views.
-from .models import Course, Thread, Post, Session # models
-# Import MessageThread, Message from messaging.models because 'create_session_view', 'accept_session_invite', 'decline_session_invite' need them.
-from messaging.models import MessageThread, Message # messaging app models because session invites
-# Import get_or_create_message_thread from messaging.utils because 'create_session_view' needs it.
-from messaging.utils import get_or_create_message_thread # session invites
-# Import SESSION_INVITE_PREFIX from messaging.constants because 'create_session_view', 'get_pending_invites_count' need it.
-from messaging.constants import SESSION_INVITE_PREFIX # working on it - prefix used for invite messages
-# Import forms from .forms because ThreadForm, PostForm, SessionCreateForm are needed by several views.
-from .forms import ThreadForm, PostForm, SessionCreateForm # forms for creating threads/posts/sessions
-# Import get_channel_layer from channels.layers because several views need it to send real-time messages.
-from channels.layers import get_channel_layer # for real-time websocket messaging
-# Import async_to_sync from asgiref.sync because several views need it to call async channel layer functions.
-from asgiref.sync import async_to_sync # lets sync code call async functions
-# Import get_online_user_ids from core.utils because 'session_detail_view', 'session_participants_view' need it.
-from core.utils import get_online_user_ids # helper to check who is online
 
-"""
-Author: Angie
-This helper function counts how many pending session invites
-a user has received but not yet responded to.
-RT: This count is used to update the real-time notification badge.
-"""
+from .models import Course, Thread, Post, Session 
+from messaging.models import MessageThread, Message 
+from messaging.utils import get_or_create_message_thread 
+from messaging.constants import SESSION_INVITE_PREFIX 
+from .forms import ThreadForm, PostForm, SessionCreateForm 
+from channels.layers import get_channel_layer 
+from asgiref.sync import async_to_sync 
+from core.utils import get_online_user_ids 
+
 # Helper: count how many session invite messages this user has (not sent by them).
 def get_pending_invites_count(user):
     return Message.objects.filter(
         thread__participants=user,
-        content__startswith='SESSION_INVITE::' # invite messages start with this text
-    ).exclude(sender=user).count() # doesn't count invites the user sent themself
+        content__startswith=SESSION_INVITE_PREFIX
+    ).exclude(sender=user).count()
 
-"""
-Author: Angie
-This function displays the main page listing all available
-course rooms, excluding the general 'hang-out' room.
-"""
 # Shows list of all courses except 'hang-out'
 @login_required
 def course_list_view(request):
     courses = Course.objects.exclude(slug='hang-out')
     return render(request, 'rooms/course_list.html', {'courses': courses})
 
-"""
-Author: Angie (Original Logic) / Oju (RT Refactor)
-This function displays the page for a single course room. It shows
-the list of discussion threads within that room and includes a form
-to start a new thread. When a new thread is submitted, it saves it
-and the initial post.
-RT: After saving a new thread, it broadcasts the HTML for the new
-thread item via WebSocket so it appears instantly for other users
-in the same room.
-"""
+# For maintenance
+@staff_member_required
+def manual_maintenance(request):
+    """
+    Manually triggers the event import and session cleanup commands.
+    Only accessible by staff/superusers.
+    """
+    try:
+        call_command('cleanup_sessions')
+        call_command('import_events')
+        return HttpResponse("Maintenance tasks complete: Sessions cleaned, Events imported.")
+    except Exception as e:
+        return HttpResponse(f"Error running tasks: {e}", status=500)
+
 # Shows a single course page with threads. Also handles creating a new thread.
 @login_required
 def course_detail_view(request, slug):
@@ -108,15 +88,6 @@ def course_detail_view(request, slug):
     context = { 'course': course, 'threads': threads, 'form': form, }
     return render(request, 'rooms/course_detail.html', context)
 
-"""
-Author: Angie (Original Logic) / Oju (RT Refactor)
-This function displays the page for a single discussion thread.
-It shows the original post and all subsequent replies. It also
-includes a form for users to add their own reply.
-RT: When a new reply is submitted and saved, it broadcasts the
-HTML for the new post via WebSocket so it appears instantly for
-other users viewing the same thread (within the same course room).
-"""
 # Shows a thread page, lists posts, and handles replies
 @login_required
 def thread_detail_view(request, slug, pk):
@@ -156,16 +127,6 @@ def thread_detail_view(request, slug, pk):
     context = { 'thread': thread, 'original_post': original_post, 'replies': replies, 'form': form, }
     return render(request, 'rooms/thread_detail.html', context)
 
-"""
-Author: Oju
-This function handles editing an existing post. When requested
-via GET, it returns the HTML form pre-filled with the post's
-content. When the form is submitted via POST, it saves the
-changes and returns the updated HTML for just that post item.
-RT: This view is designed to work with HTMX. It receives GET
-requests from HTMX to show the edit form, and POST requests
-to save changes, returning HTML partials in both cases.
-"""
 # Edits a post
 @login_required
 def edit_post_view(request, pk):
@@ -187,17 +148,6 @@ def edit_post_view(request, pk):
         # RT: Returns HTML partial for HTMX swap
         return render(request, 'rooms/partials/edit_post_form.html', {'form': form, 'post': post})
 
-"""
-Author: Angie (Original Logic) / Oju (RT Refactor)
-This function handles deleting a post. It includes a special
-check: if the post being deleted is the *only* post in a thread,
-it deletes the entire thread instead. Otherwise, it just deletes
-the single post.
-RT: This view is triggered by an HTMX POST request. It returns an
-empty response, which HTMX interprets as "delete the element
-that triggered this request" (the post item). If the whole thread
-is deleted, it uses a special HTMX header to redirect the user.
-"""
 # Deletes a post
 @login_required
 @require_POST # Ensure this view only accepts POST requests
@@ -215,25 +165,12 @@ def delete_post_view(request, pk):
         response = HttpResponse('')
         response['HX-Redirect'] = redirect('course_detail', slug=course.slug).url
         return response
-        # return redirect('course_detail', slug=course.slug) # Redirect to the course page
         
     # If not the last post, just delete the post
     post.delete()
     # RT: Returns empty response for HTMX to delete the post item
     return HttpResponse('')
 
-"""
-Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
-This function handles the creation of a new live study session.
-It displays the form on GET and processes it on POST. When a
-session is created, it adds the host as a participant, finds or
-creates a message thread for all invited participants, creates a
-special "invite" message, and sends it.
-RT: After creating the invite message, it broadcasts the message
-content to the relevant chat thread via WebSocket. It also sends
-a separate, smaller notification to each invited buddy via WebSocket
-to update their notification badge count in real-time.
-"""
 # Creates a live Session. Also sends invite messages to selected buddies.
 @login_required
 def create_session_view(request):
@@ -250,6 +187,11 @@ def create_session_view(request):
             all_participants = [request.user] + list(invited_buddies)
             # Find or create a group chat thread for everyone involved
             thread = get_or_create_message_thread(all_participants)
+            
+            # --- NAME THE THREAD FOR THE SESSION ---
+            thread.name = f"Session: {session.topic}"
+            thread.save()
+            # ---------------------------------------
             
             # --- Create Invite Message ---
             # Uses the constant to build the invite string
@@ -293,17 +235,6 @@ def create_session_view(request):
         form = SessionCreateForm(user=request.user) # Pass the user to the form
     return render(request, 'rooms/create_session.html', {'form': form})
 
-"""
-Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
-This function handles a user clicking "Accept" on a session
-invite within the chat. It adds the user to the session's
-participants, updates the original invite message to show it
-was accepted, and sends a notification to update the user's
-own notification badge count (as the invite is no longer pending).
-RT: This is triggered by an HTMX POST request. It returns the
-updated HTML content for the message bubble. It also sends a
-real-time WebSocket notification to update the user's badge count.
-"""
 # Accepts an invite: adds user to session and updates the invite message
 @login_required
 @require_POST
@@ -333,16 +264,6 @@ def accept_session_invite(request, session_id, message_id):
     # RT: Return the updated HTML content for the message bubble via HTMX
     return render(request, 'messaging/partials/message_content.html', {'message': message})
 
-"""
-Author: Cole (Original Logic) / Evan and Oju (RT Refactor)
-This function handles a user clicking "Decline" on a session
-invite within the chat. It updates the original invite message
-to show it was declined and sends a notification to update the
-user's own notification badge count (as the invite is no longer pending).
-RT: This is triggered by an HTMX POST request. It returns the
-updated HTML content for the message bubble. It also sends a
-real-time WebSocket notification to update the user's badge count.
-"""
 # Declines an invite: updates message and notifies user
 @login_required
 @require_POST
@@ -369,14 +290,6 @@ def decline_session_invite(request, session_id, message_id):
     # RT: Return the updated HTML content for the message bubble via HTMX
     return render(request, 'messaging/partials/message_content.html', {'message': message})
 
-"""
-Author: Oju
-This function displays the detail page for a specific live session.
-It shows the session topic, host, and the list of participants.
-RT: It fetches the list of currently online users to display the
-green "online" dots next to participants. The participant list
-itself is designed to auto-refresh using HTMX polling.
-"""
 # Shows the session page
 @login_required
 def session_detail_view(request, pk):
@@ -394,13 +307,6 @@ def session_detail_view(request, pk):
     }
     return render(request, 'rooms/session_detail.html', context)
 
-"""
-Author: Oju
-This function allows the host of a session to delete it.
-It performs a security check to ensure only the host can
-delete, then removes the session from the database and
-redirects the user back to their main sessions list.
-"""
 # Deletes a session
 @login_required
 @require_POST
@@ -412,13 +318,6 @@ def delete_session_view(request, pk):
     session.delete()
     return redirect('sessions') # Redirect to the main sessions list page
 
-"""
-Author: Angie
-This function allows a participant (who is not the host) to
-leave a session. It removes the user from the session's
-participant list and redirects them back to their main
-sessions list.
-"""
 # Leaves a session
 @login_required
 @require_POST
@@ -428,15 +327,6 @@ def leave_session_view(request, pk):
     session.participants.remove(request.user)
     return redirect('sessions') # Redirect to the main sessions list page
 
-"""
-Author: Angie (Original Logic) / Oju (RT Refactor)
-This function returns just the HTML fragment for the list
-of participants in a session. It's used by the session detail
-page for periodic updates.
-RT: This view is specifically designed to be called repeatedly
-by HTMX (using `hx-trigger="every 5s"`) to provide a live-updating
-participant list with correct online statuses.
-"""
 # Returns a small HTML snippet listing participants
 @login_required
 def session_participants_view(request, pk):
