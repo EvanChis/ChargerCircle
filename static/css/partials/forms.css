@@ -103,3 +103,23 @@ form textarea { min-height: 120px; }
 .auth-link-secondary:hover {
   color: var(--u-accent-color);
 }
+
+/* Mobile adjustments for auth pages */
+@media (max-width: 768px) {
+  body.logged-out .content-wrapper form {
+    text-align: left;
+    width: 100%;
+  }
+  
+  body.logged-out .content-wrapper .form-group {
+    text-align: left;
+    width: 100%;
+  }
+  
+  /* Ensure card is centered on signup page */
+  body.logged-out .content-wrapper .card {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+  }
+}

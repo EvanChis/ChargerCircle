@@ -113,4 +113,10 @@
   body.menu-open {
     overflow: hidden;
   }
+  
+  /* Mobile adjustments for logged-out header */
+  .logged-out-header {
+    padding: 1rem;
+    text-align: center;
+  }
 }

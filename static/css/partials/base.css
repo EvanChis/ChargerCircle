@@ -64,10 +64,25 @@ body.logged-out main { padding: 2rem 1.5rem; }
     overflow-x: hidden;
   }
   
+  /* Remove padding from main on logged-out pages - let content-wrapper handle spacing */
+  body.logged-out main {
+    padding: 0;
+  }
+  
   .content-wrapper {
     margin: 1rem auto;
     padding: 0 1rem;
     max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Center content on auth pages for mobile */
+  body.logged-out .content-wrapper {
+    text-align: center;
+    max-width: 95%;
+    width: auto;
+    margin: 2rem auto;
+    padding: 0 1rem;
     box-sizing: border-box;
   }
   
